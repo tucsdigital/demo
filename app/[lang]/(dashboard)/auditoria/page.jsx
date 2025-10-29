@@ -13,7 +13,6 @@ const AuditoriaPage = () => {
   const [auditoria, setAuditoria] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [filtroTipo, setFiltroTipo] = useState("todos");
   const router = useRouter();
   const params = useParams();
   const { lang } = params;
@@ -22,14 +21,14 @@ const AuditoriaPage = () => {
     if (user) {
       cargarAuditoria();
     }
-  }, [user, filtroTipo]);
+  }, [user]);
 
   const cargarAuditoria = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`/api/auditoria?tipo=${filtroTipo}&limit=100`);
+      const response = await fetch(`/api/auditoria?tipo=todos&limit=100`);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -141,45 +140,6 @@ const AuditoriaPage = () => {
         </div>
       </div>
 
-      {/* Filtros */}
-      <div className="px-2">
-        <Card className="rounded-xl shadow-lg border border-default-200">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <Icon icon="heroicons:funnel" className="w-5 h-5" />
-              Filtros
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                variant={filtroTipo === "todos" ? "default" : "outline"}
-                onClick={() => setFiltroTipo("todos")}
-                size="sm"
-              >
-                <Icon icon="heroicons:document" className="w-4 h-4 mr-2" />
-                Todos los documentos
-              </Button>
-              <Button
-                variant={filtroTipo === "presupuestos" ? "default" : "outline"}
-                onClick={() => setFiltroTipo("presupuestos")}
-                size="sm"
-              >
-                <Icon icon="heroicons:document-text" className="w-4 h-4 mr-2" />
-                Solo Presupuestos
-              </Button>
-              <Button
-                variant={filtroTipo === "ventas" ? "default" : "outline"}
-                onClick={() => setFiltroTipo("ventas")}
-                size="sm"
-              >
-                <Icon icon="heroicons:shopping-cart" className="w-4 h-4 mr-2" />
-                Solo Ventas
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Mensaje de error */}
       {error && (
@@ -220,10 +180,7 @@ const AuditoriaPage = () => {
                   No hay registros de auditoría
                 </h3>
                 <p className="text-gray-500 dark:text-gray-400">
-                  {filtroTipo === "todos" 
-                    ? "No se han eliminado documentos aún"
-                    : `No se han eliminado ${filtroTipo} aún`
-                  }
+                  No se han eliminado documentos aún
                 </p>
               </div>
             ) : (

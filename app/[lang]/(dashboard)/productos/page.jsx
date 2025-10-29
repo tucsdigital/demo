@@ -28,6 +28,8 @@ import {
   Upload,
   FileSpreadsheet,
   Download,
+  Store,
+  XCircle,
 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import {
@@ -3607,7 +3609,8 @@ const ProductosPage = () => {
                   }`}
                   onClick={() => setFiltroTienda("")}
                 >
-                  🏪 Todas las tiendas
+                  <Store className="w-4 h-4" />
+                  Todas las tiendas
                   <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-medium">
                     {productos.length}
                   </span>
@@ -3621,7 +3624,8 @@ const ProductosPage = () => {
                   }`}
                   onClick={() => setFiltroTienda("Activo")}
                 >
-                  ✅ Activos en tienda
+                  <CheckCircle className="w-4 h-4" />
+                  Activos en tienda
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                     filtroTienda === "Activo"
                       ? "bg-white/20"
@@ -3639,7 +3643,8 @@ const ProductosPage = () => {
                   }`}
                   onClick={() => setFiltroTienda("Inactivo")}
                 >
-                  ❌ Inactivos en tienda
+                  <XCircle className="w-4 h-4" />
+                  Inactivos en tienda
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                     filtroTienda === "Inactivo"
                       ? "bg-white/20"
