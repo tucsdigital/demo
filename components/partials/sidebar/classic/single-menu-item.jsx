@@ -28,7 +28,7 @@ const SingleMenuItem = ({ item, collapsed, hovered, trans }) => {
           }
         )}
       >
-        <span className="grow-0">
+        <span className="grow-0 flex items-center justify-center">
           {hasValidIcon ? (
             <IconComponent className="w-5 h-5 flex-shrink-0" />
           ) : (
@@ -36,9 +36,11 @@ const SingleMenuItem = ({ item, collapsed, hovered, trans }) => {
           )}
         </span>
         {(!collapsed || hovered) && (
-          <div className="text-box grow ">{translate(title, trans)}</div>
+          <>
+            <div className="text-box grow ">{translate(title, trans)}</div>
+            {badge && <Badge className=" rounded">{item.badge}</Badge>}
+          </>
         )}
-        {(!collapsed || hovered) && badge && <Badge className=" rounded">{item.badge}</Badge>}
       </div>
     </Link>
   );

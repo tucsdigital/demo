@@ -10,7 +10,7 @@ const SidebarLogo = ({ hovered }) => {
   const { layout } = useThemeStore();
   
   return (
-    <div className="px-4 py-4 ">
+    <div className="px-4 py-3">
       <div className="flex items-center justify-between">
         <div className={collapsed ? "flex-1 flex justify-center" : "flex-1"}>
           <Link href="/dashboard" className="flex items-center gap-x-3">
