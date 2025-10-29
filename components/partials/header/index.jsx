@@ -15,11 +15,15 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import MobileMenuHandler from "./mobile-menu-handler";
 import ClassicHeader from "./layout/classic-header";
 import FullScreen from "./full-screen";
+import LicenseCounter from "./license-counter";
 
 const NavTools = ({ isDesktop, isMobile, sidebarType }) => {
   return (
     <div className="nav-tools flex items-center  gap-2">
       {isDesktop && <FullScreen />}
+
+      {/* Contador de licencia */}
+      <LicenseCounter />
 
       <ThemeButton />
       {/* <Inbox />

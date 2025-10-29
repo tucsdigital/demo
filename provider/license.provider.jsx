@@ -25,6 +25,10 @@ const LicenseProvider = ({ children }) => {
   const [modules, setModules] = useState([]);
   const [enabledModules, setEnabledModules] = useState([]);
   const [loadingModules, setLoadingModules] = useState(true);
+  
+  // Modo tolerante: permite trabajar aunque la licencia expire
+  // Evita interrupciones durante el trabajo activo
+  const [tolerantMode, setTolerantMode] = useState(false);
 
   // Cargar información de licencia
   const loadLicense = async () => {
@@ -87,10 +91,31 @@ const LicenseProvider = ({ children }) => {
     loadLicense();
     loadModules();
     
-    // Actualizar cada 5 minutos
+    // Actualizar cada 60 minutos (1 hora) para no interferir con el trabajo del usuario
+    // Solo verifica en segundo plano sin bloquear la interfaz
     const interval = setInterval(() => {
-      loadLicense();
-    }, 5 * 60 * 1000);
+      // Verificar en segundo plano sin mostrar loading
+      getLicenseInfo().then(info => {
+        setLicenseInfo(info);
+        // Si la licencia expira, activar modo tolerante en lugar de bloquear inmediatamente
+        if (info?.expired && !tolerantMode) {
+          console.warn("Licencia expirada detectada, activando modo tolerante");
+          setTolerantMode(true);
+          // Permitir acceso por 24 horas más (período de gracia)
+          setTimeout(() => {
+            setTolerantMode(false);
+            setIsValid(false);
+          }, 24 * 60 * 60 * 1000);
+        }
+      });
+      
+      isLicenseValid().then(valid => {
+        // Solo actualizar isValid si no estamos en modo tolerante
+        if (!tolerantMode) {
+          setIsValid(valid);
+        }
+      });
+    }, 60 * 60 * 1000); // 60 minutos
     
     return () => clearInterval(interval);
   }, []);
@@ -99,7 +124,9 @@ const LicenseProvider = ({ children }) => {
     license: null, // Mantener para compatibilidad
     licenseInfo,
     loading,
-    isValid,
+    isValid: tolerantMode || isValid, // En modo tolerante, permitir acceso
+    tolerantMode,
+    setTolerantMode,
     modules,
     enabledModules,
     loadingModules,

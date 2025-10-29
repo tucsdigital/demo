@@ -806,7 +806,7 @@ const SalesStats = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {/* Comisión por ventas */}
-              <div className="p-3 md:p-4 rounded-xl border border-default-200 bg-gradient-to-br from-fuchsia-50 to-fuchsia-100/40 dark:from-fuchsia-900/20 dark:to-fuchsia-900/10 shadow-sm">
+              {/* <div className="p-3 md:p-4 rounded-xl border border-default-200 bg-gradient-to-br from-fuchsia-50 to-fuchsia-100/40 dark:from-fuchsia-900/20 dark:to-fuchsia-900/10 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-xs md:text-sm text-fuchsia-700 dark:text-fuchsia-300">
                     Comisión Ventas
@@ -824,7 +824,7 @@ const SalesStats = () => {
                 <div className="text-[10px] md:text-xs text-default-500 mt-1">
                   2.5% sobre ventas
                 </div>
-              </div>
+              </div> */}
 
               {/* Total Obras */}
               <div className="p-3 md:p-4 rounded-xl border border-default-200 bg-gradient-to-br from-blue-50 to-blue-100/40 dark:from-blue-900/20 dark:to-blue-900/10 shadow-sm">
@@ -847,7 +847,7 @@ const SalesStats = () => {
                 </div>
               </div>
               {/* Comisión por Obras */}
-              <div className="p-3 md:p-4 rounded-xl border border-default-200 bg-gradient-to-br from-orange-50 to-orange-100/40 dark:from-orange-900/20 dark:to-orange-900/10 shadow-sm">
+              {/* <div className="p-3 md:p-4 rounded-xl border border-default-200 bg-gradient-to-br from-orange-50 to-orange-100/40 dark:from-orange-900/20 dark:to-orange-900/10 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-xs md:text-sm text-orange-700 dark:text-orange-300">
                     Comisión Obras
@@ -865,7 +865,7 @@ const SalesStats = () => {
                 <div className="text-[10px] md:text-xs text-default-500 mt-1">
                   2.5% sobre total
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4">
