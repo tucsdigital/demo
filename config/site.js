@@ -4,7 +4,7 @@ export const siteConfig = {
   keywords: "maderera, Tucs Digital, gestión de ventas, stock, clientes, proyectos, administración, POS, panel administrativo, comercio de maderas",
   author: "Tucs Digital",
   theme: "violet",
-  layout: "vertical",
+  layout: "semibox",
   // semi-box, horizontal, vertical
   hideSideBar: false,
   sidebarType: "module",
