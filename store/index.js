@@ -8,7 +8,7 @@ export const useThemeStore = create(
       setTheme: (theme) => set({ theme }),
       radius: siteConfig.radius,
       setRadius: (value) => set({ radius: value }),
-      layout: siteConfig.layout,
+      layout: "semibox", // Forzar semibox como predeterminado
       setLayout: (value) => {
         set({ layout: value });
 
@@ -44,8 +44,7 @@ export const useSidebar = create(
     (set) => ({
       collapsed: false,
       setCollapsed: (value) => set({ collapsed: value }),
-      sidebarType:
-        siteConfig.layout === "semibox" ? "popover" : siteConfig.sidebarType,
+      sidebarType: "popover", // Forzar popover para semibox
       setSidebarType: (value) => {
         set({ sidebarType: value });
       },
