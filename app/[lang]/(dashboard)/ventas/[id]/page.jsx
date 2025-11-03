@@ -188,7 +188,7 @@ const VentaDetalle = () => {
     }
     // Restaurar el título original al desmontar el componente
     return () => {
-      document.title = "Tucs Digital - Panel Administrativo";
+      document.title = "Maderas Caballero - Panel Administrativo";
     };
   }, [venta?.numeroPedido]);
 
@@ -472,24 +472,24 @@ const VentaDetalle = () => {
         if (busquedaNormalizada !== "") {
           if (busquedaNormalizada.endsWith(".")) {
             const busquedaSinPunto = busquedaNormalizada.slice(0, -1);
-          cumpleBusqueda = 
+            cumpleBusqueda = 
               nombreNormalizado.startsWith(busquedaSinPunto) ||
               unidadNormalizada.startsWith(busquedaSinPunto);
-        } else {
-          cumpleBusqueda = 
+          } else {
+            cumpleBusqueda = 
               nombreNormalizado.includes(busquedaNormalizada) ||
               unidadNormalizada.includes(busquedaNormalizada);
+          }
         }
-      }
         const cumpleCategoria = !categoriaId || prod.categoria === categoriaId;
-      const cumpleTipoMadera =
-        categoriaId !== "Maderas" ||
-        filtroTipoMadera === "" ||
-        prod.tipoMadera === filtroTipoMadera;
-      const cumpleSubCategoria =
-        categoriaId !== "Ferretería" ||
-        filtroSubCategoria === "" ||
-        prod.subCategoria === filtroSubCategoria;
+        const cumpleTipoMadera =
+          categoriaId !== "Maderas" ||
+          filtroTipoMadera === "" ||
+          prod.tipoMadera === filtroTipoMadera;
+        const cumpleSubCategoria =
+          categoriaId !== "Ferretería" ||
+          filtroSubCategoria === "" ||
+          prod.subCategoria === filtroSubCategoria;
         return (
           cumpleCategoria && cumpleBusqueda && cumpleTipoMadera && cumpleSubCategoria
         );
@@ -1530,17 +1530,17 @@ const VentaDetalle = () => {
           style={{ marginBottom: 32 }}
         >
           <img
-            src="/tucs-logo-vertical.png"
+            src="/logo-maderera.png"
             alt="Logo Maderera"
             style={{ height: 60, width: "auto" }}
           />
           <div>
             <h1 className="text-2xl font-bold " style={{ letterSpacing: 1 }}>
-              Tucs Digital
+              Maderas Caballero
             </h1>
             <div className=" text-sm">Venta / Comprobante</div>
             <div className="text-gray-500 text-xs">
-              www.tucsdigital.com
+              www.caballeromaderas.com
             </div>
           </div>
           <div className="ml-auto text-right">
@@ -2366,79 +2366,9 @@ const VentaDetalle = () => {
                       </div>
                     </div>
 
-                    {/* Filtros específicos por categoría */}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      {/* Filtro de tipo de madera */}
-                      {categoriaId === "Maderas" && tiposMadera.length > 0 && (
-                        <div className="flex-1">
-                          <div className="flex bg-card rounded-lg p-1 shadow-sm border border-gray-200">
-                            <button
-                              type="button"
-                              className={`rounded-full px-4 py-1 text-sm flex items-center gap-2 transition-all ${
-                                filtroTipoMadera === ""
-                                  ? "bg-orange-600 text-white"
-                                  : "bg-gray-100 text-gray-700"
-                              }`}
-                              onClick={() => setFiltroTipoMadera("")}
-                            >
-                              Todos los tipos
-                            </button>
-                            {tiposMadera.map((tipo) => (
-                              <button
-                                key={tipo}
-                                type="button"
-                                className={`rounded-md px-4 py-1 text-sm flex items-center gap-2 transition-all ${
-                                  filtroTipoMadera === tipo
-                                    ? "bg-orange-600 text-white"
-                                    : "bg-gray-100 text-gray-700"
-                                }`}
-                                onClick={() => setFiltroTipoMadera(tipo)}
-                              >
-                                {tipo}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Filtro de subcategoría de ferretería */}
-                      {categoriaId === "Ferretería" &&
-                        subCategoriasFerreteria.length > 0 && (
-                          <div className="flex-1">
-                            <div className="flex bg-card rounded-lg p-1 shadow-sm border border-gray-200">
-                              <button
-                                type="button"
-                                className={`rounded-md px-4 py-1 text-sm flex items-center gap-2 transition-all ${
-                                  filtroSubCategoria === ""
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-gray-100 text-gray-700"
-                                }`}
-                                onClick={() => setFiltroSubCategoria("")}
-                              >
-                                Todas las subcategorías
-                              </button>
-                              {subCategoriasFerreteria.map((subCategoria) => (
-                                <button
-                                  key={subCategoria}
-                                  type="button"
-                                  className={`rounded-full px-4 py-1 text-sm flex items-center gap-2 transition-all ${
-                                    filtroSubCategoria === subCategoria
-                                      ? "bg-blue-600 text-white"
-                                      : "bg-gray-100 text-gray-700"
-                                  }`}
-                                  onClick={() =>
-                                    setFiltroSubCategoria(subCategoria)
-                                  }
-                                >
-                                  {subCategoria}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                      {/* Buscador mejorado */}
-                      <div className="flex-1 relative">
+                    {/* Buscador mejorado - siempre visible */}
+                    <div className="w-full">
+                      <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <svg
                             className="h-5 w-5 text-gray-400"
@@ -2462,6 +2392,78 @@ const VentaDetalle = () => {
                           className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-card"
                         />
                       </div>
+                    </div>
+
+                    {/* Filtros específicos por categoría */}
+                    <div className="flex flex-col gap-3">
+                      {/* Filtro de tipo de madera */}
+                      {categoriaId === "Maderas" && tiposMadera.length > 0 && (
+                        <div className="w-full">
+                          <div className="flex flex-wrap gap-2 bg-card rounded-lg p-2 shadow-sm border border-gray-200">
+                            <button
+                              type="button"
+                              className={`rounded-full px-4 py-1.5 text-sm flex items-center gap-2 transition-all ${
+                                filtroTipoMadera === ""
+                                  ? "bg-orange-600 text-white"
+                                  : "bg-gray-100 text-gray-700"
+                              }`}
+                              onClick={() => setFiltroTipoMadera("")}
+                            >
+                              Todos los tipos
+                            </button>
+                            {tiposMadera.map((tipo) => (
+                              <button
+                                key={tipo}
+                                type="button"
+                                className={`rounded-md px-4 py-1.5 text-sm flex items-center gap-2 transition-all ${
+                                  filtroTipoMadera === tipo
+                                    ? "bg-orange-600 text-white"
+                                    : "bg-gray-100 text-gray-700"
+                                }`}
+                                onClick={() => setFiltroTipoMadera(tipo)}
+                              >
+                                {tipo}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Filtro de subcategoría de ferretería */}
+                      {categoriaId === "Ferretería" &&
+                        subCategoriasFerreteria.length > 0 && (
+                          <div className="w-full">
+                            <div className="flex flex-wrap gap-2 bg-card rounded-lg p-2 shadow-sm border border-gray-200 overflow-x-auto">
+                              <button
+                                type="button"
+                                className={`rounded-full px-4 py-1.5 text-sm flex items-center gap-2 transition-all whitespace-nowrap ${
+                                  filtroSubCategoria === ""
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-gray-100 text-gray-700"
+                                }`}
+                                onClick={() => setFiltroSubCategoria("")}
+                              >
+                                Todas las subcategorías
+                              </button>
+                              {subCategoriasFerreteria.map((subCategoria) => (
+                                <button
+                                  key={subCategoria}
+                                  type="button"
+                                  className={`rounded-md px-4 py-1.5 text-sm flex items-center gap-2 transition-all whitespace-nowrap ${
+                                    filtroSubCategoria === subCategoria
+                                      ? "bg-blue-600 text-white"
+                                      : "bg-gray-100 text-gray-700"
+                                  }`}
+                                  onClick={() =>
+                                    setFiltroSubCategoria(subCategoria)
+                                  }
+                                >
+                                  {subCategoria}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -2511,6 +2513,8 @@ const VentaDetalle = () => {
 
                           {productosPaginados.map((prod) => {
                           const yaAgregado = (ventaEdit.productos || []).some((p) => p.id === prod.id);
+                          const itemAgregado = (ventaEdit.productos || []).find((p) => p.id === prod.id);
+                          const cantidadActual = itemAgregado?.cantidad || 0;
                           const precio = (() => {
                             if (prod.categoria === "Maderas") return prod.precioPorPie || 0;
                             if (prod.categoria === "Ferretería") return prod.valorVenta || 0;
@@ -2576,18 +2580,104 @@ const VentaDetalle = () => {
                                   )}
                                 </div>
 
-                                {/* Botón de agregar */}
+                                {/* Botón de agregar o controles de cantidad */}
                                 <div className="mt-4">
-                                      <button
-                                    onClick={() => {
-                                      if (yaAgregado) return;
-                                      if (prod.categoria === "Maderas") {
-                                        const alto = Number(prod.alto) || 0;
-                                        const ancho = Number(prod.ancho) || 0;
-                                        const largo = Number(prod.largo) || 0;
-                                        const precioPorPie = Number(prod.precioPorPie) || 0;
-                                        if (alto > 0 && ancho > 0 && largo > 0 && precioPorPie > 0) {
-                                          const precioCalc = calcularPrecioCorteMadera({ alto, ancho, largo, precioPorPie });
+                                {yaAgregado ? (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        if (cantidadActual > 1) {
+                                          handleDecrementarCantidad(prod.id);
+                                        } else {
+                                          handleQuitarProducto(prod.id);
+                                        }
+                                      }}
+                                      disabled={loadingPrecios}
+                                      className="flex-1 bg-red-500 text-white py-2 px-3 rounded-md text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50"
+                                    >
+                                      −
+                                    </button>
+                                    <div className="flex-1 text-center">
+                                      <div className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 py-2 px-3 rounded-md text-sm font-bold">
+                                        {cantidadActual}
+                                      </div>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleIncrementarCantidad(prod.id);
+                                      }}
+                                      disabled={loadingPrecios}
+                                      className="flex-1 bg-green-500 text-white py-2 px-3 rounded-md text-sm font-medium hover:bg-green-600 transition-colors disabled:opacity-50"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                        if (prod.categoria === "Maderas") {
+                                          const alto = Number(prod.alto) || 0;
+                                          const ancho = Number(prod.ancho) || 0;
+                                          const largo = Number(prod.largo) || 0;
+                                          const precioPorPie = Number(prod.precioPorPie) || 0;
+                                          if (alto > 0 && ancho > 0 && largo > 0 && precioPorPie > 0) {
+                                            const precioCalc = calcularPrecioCorteMadera({ alto, ancho, largo, precioPorPie });
+                                            setVentaEdit((prev) => ({
+                                              ...prev,
+                                              productos: [
+                                                ...(prev.productos || []),
+                                                {
+                                                  id: prod.id,
+                                                  nombre: prod.nombre,
+                                                  precio: precioCalc,
+                                                  unidad: prod.unidadMedida,
+                                                  stock: prod.stock,
+                                                  cantidad: 1,
+                                                  descuento: 0,
+                                                  categoria: prod.categoria,
+                                                  alto,
+                                                  ancho,
+                                                  largo,
+                                                  precioPorPie,
+                                                  cepilladoAplicado: false,
+                                                  tipoMadera: prod.tipoMadera || "",
+                                                  subcategoria: prod.subcategoria || prod.subCategoria || "",
+                                                },
+                                              ],
+                                            }));
+                                          } else {
+                                            console.warn("El producto de madera no tiene dimensiones válidas.");
+                                          }
+                                        } else if (prod.categoria === "Ferretería") {
+                                            setVentaEdit((prev) => ({
+                                              ...prev,
+                                            productos: [
+                                              ...(prev.productos || []),
+                                              {
+                                                id: prod.id,
+                                                nombre: prod.nombre,
+                                                precio: prod.valorVenta || 0,
+                                                unidad: prod.unidadMedida || prod.unidadVenta,
+                                                stock: prod.stock,
+                                                cantidad: 1,
+                                                descuento: 0,
+                                                categoria: prod.categoria,
+                                              },
+                                            ],
+                                          }));
+                                        } else {
+                                          const precioOtro = (
+                                            prod.precioUnidad || prod.precioUnidadVenta || prod.precioUnidadHerraje || prod.precioUnidadQuimico || prod.precioUnidadHerramienta || 0
+                                          );
                                           setVentaEdit((prev) => ({
                                             ...prev,
                                             productos: [
@@ -2595,69 +2685,23 @@ const VentaDetalle = () => {
                                               {
                                                 id: prod.id,
                                                 nombre: prod.nombre,
-                                                precio: precioCalc,
-                                                unidad: prod.unidadMedida,
+                                                precio: precioOtro,
+                                                unidad: prod.unidadMedida || prod.unidadVenta,
                                                 stock: prod.stock,
                                                 cantidad: 1,
                                                 descuento: 0,
                                                 categoria: prod.categoria,
-                                                alto,
-                                                ancho,
-                                                largo,
-                                                precioPorPie,
-                                                cepilladoAplicado: false,
-                                                tipoMadera: prod.tipoMadera || "",
-                                                subcategoria: prod.subcategoria || prod.subCategoria || "",
                                               },
                                             ],
                                           }));
-                                        } else {
-                                          console.warn("El producto de madera no tiene dimensiones válidas.");
                                         }
-                                      } else if (prod.categoria === "Ferretería") {
-                                          setVentaEdit((prev) => ({
-                                            ...prev,
-                                          productos: [
-                                            ...(prev.productos || []),
-                                            {
-                                              id: prod.id,
-                                              nombre: prod.nombre,
-                                              precio: prod.valorVenta || 0,
-                                              unidad: prod.unidadMedida || prod.unidadVenta,
-                                              stock: prod.stock,
-                                              cantidad: 1,
-                                              descuento: 0,
-                                              categoria: prod.categoria,
-                                            },
-                                          ],
-                                        }));
-                                      } else {
-                                        const precioOtro = (
-                                          prod.precioUnidad || prod.precioUnidadVenta || prod.precioUnidadHerraje || prod.precioUnidadQuimico || prod.precioUnidadHerramienta || 0
-                                        );
-                                        setVentaEdit((prev) => ({
-                                          ...prev,
-                                          productos: [
-                                            ...(prev.productos || []),
-                                            {
-                                              id: prod.id,
-                                              nombre: prod.nombre,
-                                              precio: precioOtro,
-                                              unidad: prod.unidadMedida || prod.unidadVenta,
-                                              stock: prod.stock,
-                                              cantidad: 1,
-                                              descuento: 0,
-                                              categoria: prod.categoria,
-                                            },
-                                          ],
-                                        }));
-                                      }
-                                    }}
-                                    disabled={yaAgregado || loadingPrecios}
-                                    className={`w-full py-2 px-3 rounded-md text-sm font-medium transition-colors ${yaAgregado ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 cursor-not-allowed" : "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"}`}
-                                  >
-                                    {yaAgregado ? "Ya agregado" : "Agregar"}
+                                      }}
+                                      disabled={loadingPrecios}
+                                      className="w-full py-2 px-3 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:opacity-50"
+                                    >
+                                      Agregar
                                     </button>
+                                  )}
                                 </div>
                               </div>
                             </div>

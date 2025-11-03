@@ -1679,83 +1679,9 @@ export function FormularioVentaPresupuesto({ tipo, onClose, onSubmit }) {
                     </div>
                   </div>
 
-                  {/* Filtros específicos por categoría */}
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    {/* Filtro de tipo de madera */}
-                    {categoriaId === "Maderas" && tiposMadera.length > 0 && (
-                      <div className="flex-1">
-                        <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600">
-                          <button
-                            type="button"
-                            className={`rounded-full px-4 py-1 text-sm flex items-center gap-2 transition-all ${
-                              filtroTipoMadera === ""
-                                ? "bg-orange-600 text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            }`}
-                            onClick={() => setFiltroTipoMadera("")}
-                            disabled={isSubmitting}
-                          >
-                            Todos los tipos
-                          </button>
-                          {tiposMadera.map((tipo) => (
-                            <button
-                              key={tipo}
-                              type="button"
-                              className={`rounded-md px-4 py-1 text-sm flex items-center gap-2 transition-all ${
-                                filtroTipoMadera === tipo
-                                  ? "bg-orange-600 text-white"
-                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                              }`}
-                              onClick={() => setFiltroTipoMadera(tipo)}
-                              disabled={isSubmitting}
-                            >
-                              {tipo}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Filtro de subcategoría de ferretería */}
-                    {categoriaId === "Ferretería" &&
-                      subCategoriasFerreteria.length > 0 && (
-                        <div className="flex-1">
-                          <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600">
-                            <button
-                              type="button"
-                              className={`rounded-md px-4 py-1 text-sm flex items-center gap-2 transition-all ${
-                                filtroSubCategoria === ""
-                                  ? "bg-blue-600 text-white"
-                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                              }`}
-                              onClick={() => setFiltroSubCategoria("")}
-                              disabled={isSubmitting}
-                            >
-                              Todas las subcategorías
-                            </button>
-                            {subCategoriasFerreteria.map((subCategoria) => (
-                              <button
-                                key={subCategoria}
-                                type="button"
-                                className={`rounded-full px-4 py-1 text-sm flex items-center gap-2 transition-all ${
-                                  filtroSubCategoria === subCategoria
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                }`}
-                                onClick={() =>
-                                  setFiltroSubCategoria(subCategoria)
-                                }
-                                disabled={isSubmitting}
-                              >
-                                {subCategoria}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                    {/* Buscador mejorado */}
-                    <div className="flex-1 relative flex items-center gap-2">
+                  {/* Buscador mejorado - siempre visible */}
+                  <div className="w-full">
+                    <div className="relative flex items-center gap-2">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg
                           className="h-5 w-5 text-gray-400"
@@ -1785,6 +1711,82 @@ export function FormularioVentaPresupuesto({ tipo, onClose, onSubmit }) {
                       />
                       {/* Búsqueda en memoria: no se necesita indicador remoto ni botón */}
                     </div>
+                  </div>
+
+                  {/* Filtros específicos por categoría */}
+                  <div className="flex flex-col gap-3">
+                    {/* Filtro de tipo de madera */}
+                    {categoriaId === "Maderas" && tiposMadera.length > 0 && (
+                      <div className="w-full">
+                        <div className="flex flex-wrap gap-2 bg-white dark:bg-gray-800 rounded-lg p-2 shadow-sm border border-gray-200 dark:border-gray-600">
+                          <button
+                            type="button"
+                            className={`rounded-full px-4 py-1.5 text-sm flex items-center gap-2 transition-all ${
+                              filtroTipoMadera === ""
+                                ? "bg-orange-600 text-white"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                            onClick={() => setFiltroTipoMadera("")}
+                            disabled={isSubmitting}
+                          >
+                            Todos los tipos
+                          </button>
+                          {tiposMadera.map((tipo) => (
+                            <button
+                              key={tipo}
+                              type="button"
+                              className={`rounded-md px-4 py-1.5 text-sm flex items-center gap-2 transition-all ${
+                                filtroTipoMadera === tipo
+                                  ? "bg-orange-600 text-white"
+                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              }`}
+                              onClick={() => setFiltroTipoMadera(tipo)}
+                              disabled={isSubmitting}
+                            >
+                              {tipo}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Filtro de subcategoría de ferretería */}
+                    {categoriaId === "Ferretería" &&
+                      subCategoriasFerreteria.length > 0 && (
+                        <div className="w-full">
+                          <div className="flex flex-wrap gap-2 bg-white dark:bg-gray-800 rounded-lg p-2 shadow-sm border border-gray-200 dark:border-gray-600 overflow-x-auto">
+                            <button
+                              type="button"
+                              className={`rounded-full px-4 py-1.5 text-sm flex items-center gap-2 transition-all whitespace-nowrap ${
+                                filtroSubCategoria === ""
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              }`}
+                              onClick={() => setFiltroSubCategoria("")}
+                              disabled={isSubmitting}
+                            >
+                              Todas las subcategorías
+                            </button>
+                            {subCategoriasFerreteria.map((subCategoria) => (
+                              <button
+                                key={subCategoria}
+                                type="button"
+                                className={`rounded-md px-4 py-1.5 text-sm flex items-center gap-2 transition-all whitespace-nowrap ${
+                                  filtroSubCategoria === subCategoria
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                }`}
+                                onClick={() =>
+                                  setFiltroSubCategoria(subCategoria)
+                                }
+                                disabled={isSubmitting}
+                              >
+                                {subCategoria}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>
@@ -1883,6 +1885,8 @@ export function FormularioVentaPresupuesto({ tipo, onClose, onSubmit }) {
                         const yaAgregado = productosSeleccionados.some(
                           (p) => p.id === prod.id
                         );
+                        const itemAgregado = productosSeleccionados.find((p) => p.id === prod.id);
+                        const cantidadActual = itemAgregado?.cantidad || 0;
                         const precio = (() => {
                           if (prod.categoria === "Maderas") {
                             return prod.precioPorPie || 0;
@@ -2015,109 +2019,146 @@ export function FormularioVentaPresupuesto({ tipo, onClose, onSubmit }) {
 
                               {/* Botón de agregar */}
                               <div className="mt-4">
-                                <button
-                                  onClick={() => {
-                                    if (prod.categoria === "Maderas") {
-                                      const alto = Number(prod.alto) || 0;
-                                      const ancho = Number(prod.ancho) || 0;
-                                      const largo = Number(prod.largo) || 0;
-                                      const precioPorPie = Number(prod.precioPorPie) || 0;
-
-                                      if (prod.unidadMedida === "Unidad") {
-                                        if (precioPorPie > 0) {
-                                          const precioUnidad = Math.round(precioPorPie / 100) * 100;
-                                          handleAgregarProducto({
-                                            id: prod.id,
-                                            nombre: prod.nombre,
-                                            precio: precioUnidad,
-                                            unidad: prod.unidadMedida,
-                                            stock: prod.stock,
-                                            alto,
-                                            ancho,
-                                            largo,
-                                            precioPorPie,
-                                          });
+                                {yaAgregado ? (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        if (cantidadActual > 1) {
+                                          handleDecrementarCantidad(prod.id);
                                         } else {
-                                          setSubmitStatus("error");
-                                          setSubmitMessage("El producto de madera por unidad no tiene un precio válido.");
-                                          return;
+                                          handleQuitarProducto(prod.id);
                                         }
-                                      } else if (prod.unidadMedida === "M2") {
-                                        if (alto > 0 && largo > 0 && precioPorPie > 0) {
-                                          const precioM2 = calcularPrecioMachimbre({
-                                            alto,
-                                            largo,
-                                            cantidad: 1,
-                                            precioPorPie,
-                                          });
-                                          handleAgregarProducto({
-                                            id: prod.id,
-                                            nombre: prod.nombre,
-                                            precio: precioM2,
-                                            unidad: prod.unidadMedida,
-                                            stock: prod.stock,
-                                            alto,
-                                            largo,
-                                            precioPorPie,
-                                          });
+                                      }}
+                                      disabled={isSubmitting}
+                                      className="flex-1 bg-red-500 text-white py-2 px-3 rounded-md text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50"
+                                    >
+                                      −
+                                    </button>
+                                    <div className="flex-1 text-center">
+                                      <div className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 py-2 px-3 rounded-md text-sm font-bold">
+                                        {cantidadActual}
+                                      </div>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleIncrementarCantidad(prod.id);
+                                      }}
+                                      disabled={isSubmitting}
+                                      className="flex-1 bg-green-500 text-white py-2 px-3 rounded-md text-sm font-medium hover:bg-green-600 transition-colors disabled:opacity-50"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      if (prod.categoria === "Maderas") {
+                                        const alto = Number(prod.alto) || 0;
+                                        const ancho = Number(prod.ancho) || 0;
+                                        const largo = Number(prod.largo) || 0;
+                                        const precioPorPie = Number(prod.precioPorPie) || 0;
+
+                                        if (prod.unidadMedida === "Unidad") {
+                                          if (precioPorPie > 0) {
+                                            const precioUnidad = Math.round(precioPorPie / 100) * 100;
+                                            handleAgregarProducto({
+                                              id: prod.id,
+                                              nombre: prod.nombre,
+                                              precio: precioUnidad,
+                                              unidad: prod.unidadMedida,
+                                              stock: prod.stock,
+                                              alto,
+                                              ancho,
+                                              largo,
+                                              precioPorPie,
+                                            });
+                                          } else {
+                                            setSubmitStatus("error");
+                                            setSubmitMessage("El producto de madera por unidad no tiene un precio válido.");
+                                            return;
+                                          }
+                                        } else if (prod.unidadMedida === "M2") {
+                                          if (alto > 0 && largo > 0 && precioPorPie > 0) {
+                                            const precioM2 = calcularPrecioMachimbre({
+                                              alto,
+                                              largo,
+                                              cantidad: 1,
+                                              precioPorPie,
+                                            });
+                                            handleAgregarProducto({
+                                              id: prod.id,
+                                              nombre: prod.nombre,
+                                              precio: precioM2,
+                                              unidad: prod.unidadMedida,
+                                              stock: prod.stock,
+                                              alto,
+                                              largo,
+                                              precioPorPie,
+                                            });
+                                          } else {
+                                            setSubmitStatus("error");
+                                            setSubmitMessage(
+                                              "El producto machimbre/deck no tiene dimensiones válidas en la base de datos."
+                                            );
+                                            return;
+                                          }
                                         } else {
-                                          setSubmitStatus("error");
-                                          setSubmitMessage(
-                                            "El producto machimbre/deck no tiene dimensiones válidas en la base de datos."
-                                          );
-                                          return;
+                                          if (alto > 0 && ancho > 0 && largo > 0 && precioPorPie > 0) {
+                                            const precioCorte = calcularPrecioCorteMadera({
+                                              alto,
+                                              ancho,
+                                              largo,
+                                              precioPorPie,
+                                            });
+                                            handleAgregarProducto({
+                                              id: prod.id,
+                                              nombre: prod.nombre,
+                                              precio: precioCorte,
+                                              unidad: prod.unidadMedida,
+                                              stock: prod.stock,
+                                              alto,
+                                              ancho,
+                                              largo,
+                                              precioPorPie,
+                                            });
+                                          } else {
+                                            setSubmitStatus("error");
+                                            setSubmitMessage(
+                                              "El producto de madera no tiene dimensiones válidas en la base de datos."
+                                            );
+                                            return;
+                                          }
                                         }
                                       } else {
-                                        if (alto > 0 && ancho > 0 && largo > 0 && precioPorPie > 0) {
-                                          const precioCorte = calcularPrecioCorteMadera({
-                                            alto,
-                                            ancho,
-                                            largo,
-                                            precioPorPie,
-                                          });
-                                          handleAgregarProducto({
-                                            id: prod.id,
-                                            nombre: prod.nombre,
-                                            precio: precioCorte,
-                                            unidad: prod.unidadMedida,
-                                            stock: prod.stock,
-                                            alto,
-                                            ancho,
-                                            largo,
-                                            precioPorPie,
-                                          });
-                                        } else {
-                                          setSubmitStatus("error");
-                                          setSubmitMessage(
-                                            "El producto de madera no tiene dimensiones válidas en la base de datos."
-                                          );
-                                          return;
-                                        }
+                                        handleAgregarProducto({
+                                          id: prod.id,
+                                          nombre: prod.nombre,
+                                          precio: precio,
+                                          unidad:
+                                            prod.unidadMedida ||
+                                            prod.unidadVenta ||
+                                            prod.unidadVentaHerraje ||
+                                            prod.unidadVentaQuimico ||
+                                            prod.unidadVentaHerramienta,
+                                          stock: prod.stock,
+                                        });
                                       }
-                                    } else {
-                                      handleAgregarProducto({
-                                        id: prod.id,
-                                        nombre: prod.nombre,
-                                        precio: precio,
-                                        unidad:
-                                          prod.unidadMedida ||
-                                          prod.unidadVenta ||
-                                          prod.unidadVentaHerraje ||
-                                          prod.unidadVentaQuimico ||
-                                          prod.unidadVentaHerramienta,
-                                        stock: prod.stock,
-                                      });
-                                    }
-                                  }}
-                                  disabled={yaAgregado || isSubmitting}
-                                  className={`w-full py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                                    yaAgregado
-                                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 cursor-not-allowed"
-                                      : "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-                                  }`}
-                                >
-                                  {yaAgregado ? "Ya agregado" : "Agregar"}
-                                </button>
+                                    }}
+                                    disabled={isSubmitting}
+                                    className="w-full py-2 px-3 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:opacity-50"
+                                  >
+                                    Agregar
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </div>
