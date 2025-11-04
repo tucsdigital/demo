@@ -188,7 +188,7 @@ const VentaDetalle = () => {
     }
     // Restaurar el título original al desmontar el componente
     return () => {
-      document.title = "Maderas Caballero - Panel Administrativo";
+      document.title = "Tucs Digital - Panel Administrativo";
     };
   }, [venta?.numeroPedido]);
 
@@ -1536,11 +1536,11 @@ const VentaDetalle = () => {
           />
           <div>
             <h1 className="text-2xl font-bold " style={{ letterSpacing: 1 }}>
-              Maderas Caballero
+              Tucs Digital
             </h1>
             <div className=" text-sm">Venta / Comprobante</div>
             <div className="text-gray-500 text-xs">
-              www.caballeromaderas.com
+              www.tucsdigital.com
             </div>
           </div>
           <div className="ml-auto text-right">

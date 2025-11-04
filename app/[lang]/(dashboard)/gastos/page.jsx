@@ -367,6 +367,8 @@ const GastosPage = () => {
       setBusquedaProveedor(`${cuenta.proveedor.nombre} - ${cuenta.proveedor.telefono || ""}`);
     }
     
+    // No mostrar dropdown al editar
+    setMostrarDropdownProveedor(false);
     setOpenProveedor(true);
   };
 
@@ -391,11 +393,18 @@ const GastosPage = () => {
   const proveedoresFiltrados = useMemo(() => {
     if (!busquedaProveedor.trim()) return proveedores;
     const busqueda = busquedaProveedor.toLowerCase();
-    return proveedores.filter(p => 
-      (p.nombre || "").toLowerCase().includes(busqueda) ||
-      (p.telefono || "").toLowerCase().includes(busqueda) ||
-      (p.cuit || "").toLowerCase().includes(busqueda)
-    );
+    return proveedores.filter(p => {
+      const nombre = (p.nombre || "").toLowerCase();
+      const telefono = (p.telefono || "").toLowerCase();
+      const cuit = (p.cuit || "").toLowerCase();
+      
+      // Buscar en cada campo individualmente
+      return nombre.includes(busqueda) || 
+             telefono.includes(busqueda) || 
+             cuit.includes(busqueda) ||
+             // También buscar si el texto de búsqueda contiene el nombre del proveedor
+             busqueda.includes(nombre);
+    });
   }, [proveedores, busquedaProveedor]);
 
   // Seleccionar proveedor
@@ -688,7 +697,7 @@ const GastosPage = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm text-gray-500">Total a Pagar</div>
+                    <div className="text-sm text-gray-500">Total Gastado</div>
                     <div className="text-3xl font-bold text-blue-600">
                       ${totalesProveedores.total.toLocaleString("es-AR")}
                     </div>
@@ -1054,25 +1063,32 @@ const GastosPage = () => {
                       setMostrarDropdownProveedor(true);
                       if (!e.target.value.trim()) seleccionarProveedor(null);
                     }}
-                    onFocus={() => setMostrarDropdownProveedor(true)}
-                    className={`pl-10 pr-10 ${errorsProveedor.proveedorId ? "border-red-500" : ""}`}
+                    onFocus={(e) => {
+                      setMostrarDropdownProveedor(true);
+                      // Seleccionar todo el texto al hacer foco para facilitar cambio
+                      e.target.select();
+                    }}
+                    className={`pl-10 pr-10 ${errorsProveedor.proveedorId ? "border-red-500" : proveedorSeleccionado ? "border-green-500 bg-green-50" : ""}`}
                   />
                   {busquedaProveedor && (
                     <button
                       type="button"
-                      onClick={() => seleccionarProveedor(null)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      onClick={() => {
+                        seleccionarProveedor(null);
+                        setMostrarDropdownProveedor(false);
+                      }}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
                 
-                {mostrarDropdownProveedor && (
+                {mostrarDropdownProveedor && busquedaProveedor.trim() && (
                   <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     {proveedoresFiltrados.length === 0 ? (
                       <div className="p-3 text-sm text-gray-500 text-center">
-                        {busquedaProveedor.trim() ? "No se encontraron proveedores" : "Sin proveedores disponibles"}
+                        No se encontraron proveedores que coincidan con "{busquedaProveedor}"
                       </div>
                     ) : (
                       proveedoresFiltrados.map(proveedor => (
@@ -1080,7 +1096,9 @@ const GastosPage = () => {
                           key={proveedor.id}
                           type="button"
                           onClick={() => seleccionarProveedor(proveedor)}
-                          className="w-full text-left px-3 py-2 hover:bg-gray-100 border-b last:border-b-0"
+                          className={`w-full text-left px-3 py-2 hover:bg-blue-50 border-b last:border-b-0 transition-colors ${
+                            proveedorSeleccionado?.id === proveedor.id ? "bg-blue-100" : ""
+                          }`}
                         >
                           <div className="font-medium">{proveedor.nombre}</div>
                           <div className="text-xs text-gray-500">
@@ -1095,6 +1113,14 @@ const GastosPage = () => {
               </div>
               {errorsProveedor.proveedorId && (
                 <span className="text-red-500 text-xs">{errorsProveedor.proveedorId.message}</span>
+              )}
+              {proveedorSeleccionado && !errorsProveedor.proveedorId && (
+                <span className="text-green-600 text-xs flex items-center gap-1 mt-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Proveedor seleccionado
+                </span>
               )}
             </div>
             
@@ -1246,10 +1272,10 @@ const GastosPage = () => {
               <div>
                 <Label>Método de Pago</Label>
                 <Select value={metodoPago} onValueChange={setMetodoPago}>
-                  <SelectTrigger>
-                    <SelectValue />
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar método" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper" sideOffset={5}>
                     <SelectItem value="Efectivo">Efectivo</SelectItem>
                     <SelectItem value="Transferencia">Transferencia</SelectItem>
                     <SelectItem value="Cheque">Cheque</SelectItem>

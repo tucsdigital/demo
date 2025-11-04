@@ -186,7 +186,7 @@ const PresupuestoDetalle = () => {
     }
     // Restaurar el título original al desmontar el componente
     return () => {
-      document.title = "Maderas Caballero - Panel Administrativo";
+      document.title = "Tucs Digital - Panel Administrativo";
     };
   }, [presupuesto?.numeroPedido]);
 

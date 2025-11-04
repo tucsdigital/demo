@@ -1422,9 +1422,11 @@ const ProductosPage = () => {
   const [draggedImage, setDraggedImage] = useState(null);
   const [targetProduct, setTargetProduct] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("info");
+  const [showDragDropBanner, setShowDragDropBanner] = useState(true);
 
   // Función para cargar datos precargados de Firebase
   const cargarDatosPrecargados = () => {
@@ -2769,7 +2771,15 @@ const ProductosPage = () => {
       "stock",
       "estado",
       "estadoTienda",
-      "ubicacion"
+      "ubicacion",
+      "freeShipping",
+      "featuredBrand",
+      "newArrival",
+      "specialOffer",
+      "rating",
+      "descuentoMonto",
+      "descuentoPorcentaje",
+      "imagenes"
     ];
 
     const csvRows = [headers.join(",")];
@@ -2791,7 +2801,15 @@ const ProductosPage = () => {
         producto.stock || "",
         producto.estado || "Activo",
         producto.estadoTienda || "Inactivo",
-        producto.ubicacion || ""
+        producto.ubicacion || "",
+        producto.freeShipping ? "Si" : "No",
+        producto.featuredBrand ? "Si" : "No",
+        producto.newArrival ? "Si" : "No",
+        producto.specialOffer ? "Si" : "No",
+        producto.rating || "0",
+        producto.discount?.amount || "0",
+        producto.discount?.percentage || "0",
+        (producto.imagenes || []).join(" | ")
       ].map(field => `"${field}"`).join(",");
       
       csvRows.push(row);
@@ -2833,7 +2851,15 @@ const ProductosPage = () => {
       "valorVenta",
       "stock",
       "estado",
-      "estadoTienda"
+      "estadoTienda",
+      "freeShipping",
+      "featuredBrand",
+      "newArrival",
+      "specialOffer",
+      "rating",
+      "descuentoMonto",
+      "descuentoPorcentaje",
+      "imagenes"
     ];
 
     const csvRows = [headers.join(",")];
@@ -2853,7 +2879,15 @@ const ProductosPage = () => {
         producto.valorVenta || "",
         producto.stock || "0",
         producto.estado || "Activo",
-        producto.estadoTienda || "Inactivo"
+        producto.estadoTienda || "Inactivo",
+        producto.freeShipping ? "Si" : "No",
+        producto.featuredBrand ? "Si" : "No",
+        producto.newArrival ? "Si" : "No",
+        producto.specialOffer ? "Si" : "No",
+        producto.rating || "0",
+        producto.discount?.amount || "0",
+        producto.discount?.percentage || "0",
+        (producto.imagenes || []).join(" | ")
       ].map(field => `"${field}"`).join(",");
       
       csvRows.push(row);
@@ -3159,6 +3193,7 @@ const ProductosPage = () => {
 
     try {
       setUploadingImage(true);
+      setUploadProgress(0);
       
       // Convertir a array si es un solo archivo (retrocompatibilidad)
       const imagesToUpload = Array.isArray(draggedImage) ? draggedImage : [draggedImage];
@@ -3179,13 +3214,29 @@ const ProductosPage = () => {
       // Limitar las imágenes a subir según el espacio disponible
       const imagenesFiltradas = imagesToUpload.slice(0, espacioDisponible);
       
-      showToast(`Subiendo ${imagenesFiltradas.length} imagen(es)...`, "loading");
+      // Mensaje inicial más descriptivo
+      const mensajeInicial = imagenesFiltradas.length === 1 
+        ? 'Preparando imagen para subir...' 
+        : `Preparando ${imagenesFiltradas.length} imágenes para subir...`;
+      showToast(mensajeInicial, "loading");
 
       // Subir todas las imágenes al servidor
       const uploadedUrls = [];
       
       for (let i = 0; i < imagenesFiltradas.length; i++) {
         const imagen = imagenesFiltradas[i];
+        
+        // Actualizar progreso en el modal
+        const progresoActual = Math.round(((i) / imagenesFiltradas.length) * 90); // 90% para subidas, 10% para guardar
+        setUploadProgress(progresoActual);
+        
+        // Actualizar toast con progreso
+        if (imagenesFiltradas.length > 1) {
+          showToast(
+            `📤 Subiendo imagen ${i + 1} de ${imagenesFiltradas.length}`, 
+            "loading"
+          );
+        }
         
         const formData = new FormData();
         formData.append('file', imagen.file);
@@ -3202,14 +3253,11 @@ const ProductosPage = () => {
 
         const result = await response.json();
         uploadedUrls.push(result.url);
-        
-        // Actualizar el toast con el progreso
-        if (imagenesFiltradas.length > 1) {
-          showToast(`Subiendo imagen ${i + 1} de ${imagenesFiltradas.length}...`, "loading");
-        }
       }
 
       // Actualizar el producto en Firebase con todas las nuevas imágenes
+      setUploadProgress(95);
+      showToast("💾 Guardando en la base de datos...", "loading");
       const productoRef = doc(db, "productos", targetProduct.id);
       
       await updateDoc(productoRef, {
@@ -3217,24 +3265,27 @@ const ProductosPage = () => {
         fechaActualizacion: new Date().toISOString(),
       });
 
+      setUploadProgress(100);
+
       // Cerrar modal y mostrar éxito
       setDragDropModalOpen(false);
       setDraggedImage(null);
       setTargetProduct(null);
+      setUploadProgress(0);
       
       const totalImagenes = currentImages.length + uploadedUrls.length;
       const imagenesRestantes = 3 - totalImagenes;
       
-      showToast(
-        `¡${uploadedUrls.length} imagen(es) subida(s) correctamente! Total: ${totalImagenes}/3${
-          imagenesRestantes > 0 ? ` - Puedes agregar ${imagenesRestantes} más.` : ' - Límite alcanzado.'
-        }`,
-        "success"
-      );
+      const mensajeExito = imagenesFiltradas.length === 1
+        ? `✅ Imagen subida correctamente. Galería: ${totalImagenes}/3${imagenesRestantes > 0 ? ` (${imagenesRestantes} espacio${imagenesRestantes !== 1 ? 's' : ''} disponible${imagenesRestantes !== 1 ? 's' : ''})` : ' (completa)'}`
+        : `✅ ${uploadedUrls.length} imágenes subidas correctamente. Galería: ${totalImagenes}/3${imagenesRestantes > 0 ? ` (${imagenesRestantes} espacio${imagenesRestantes !== 1 ? 's' : ''} disponible${imagenesRestantes !== 1 ? 's' : ''})` : ' (completa)'}`;
+      
+      showToast(mensajeExito, "success");
 
     } catch (error) {
       console.error("Error al subir imágenes:", error);
-      showToast("Error al subir las imágenes: " + error.message, "error");
+      showToast("❌ Error al subir las imágenes: " + error.message, "error");
+      setUploadProgress(0);
     } finally {
       setUploadingImage(false);
     }
@@ -3953,34 +4004,43 @@ const ProductosPage = () => {
             )}
             
             {/* Banner informativo sobre drag & drop de imágenes */}
-            <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-2 border-blue-200 rounded-xl p-4 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+            {showDragDropBanner && (
+              <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-2 border-blue-200 rounded-xl p-4 shadow-sm animate-fadeIn">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg flex-shrink-0 shadow-sm">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-blue-900 mb-1 flex items-center gap-2">
+                      <span className="text-lg">💡</span>
+                      <span>Tip: Agregar imágenes a productos</span>
+                    </h4>
+                    <p className="text-xs text-blue-700 leading-relaxed">
+                      Puedes <strong className="font-bold bg-blue-100 px-1.5 py-0.5 rounded">arrastrar y soltar</strong> imágenes (o múltiples imágenes a la vez) directamente sobre cualquier producto de la lista. 
+                      Cada producto puede tener hasta <strong className="font-bold text-blue-900">3 imágenes</strong>. 
+                      El <span className="inline-flex items-center gap-1 bg-blue-100 px-1.5 py-0.5 rounded text-blue-800 font-medium">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-[10px]">0/3</span>
+                      </span> indicador muestra cuántas ya tiene cada producto.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowDragDropBanner(false)}
+                    className="p-1.5 hover:bg-blue-200 rounded-lg transition-colors flex-shrink-0 group"
+                    title="Cerrar"
+                  >
+                    <svg className="w-4 h-4 text-blue-600 group-hover:text-blue-800 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
-                <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-blue-900 mb-1">
-                    💡 Tip: Agregar imágenes a productos
-                  </h4>
-                  <p className="text-xs text-blue-700">
-                    Puedes <strong>arrastrar y soltar</strong> imágenes directamente sobre cualquier producto de la lista para agregarlas. 
-                    Cada producto puede tener hasta <strong>3 imágenes</strong>. 
-                    El indicador de imágenes muestra cuántas ya tiene cada producto.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="p-1 hover:bg-blue-100 rounded-lg transition-colors flex-shrink-0"
-                  title="Cerrar"
-                >
-                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
               </div>
-            </div>
+            )}
           </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
@@ -4072,17 +4132,66 @@ const ProductosPage = () => {
                   {productosPaginados.map((p) => (
                     <tr
                       key={p.id}
-                      className={`border-b border-default-300 transition-all duration-200 data-[state=selected]:bg-muted ${
+                      className={`border-b border-default-300 transition-all duration-300 data-[state=selected]:bg-muted relative ${
                         dragOverProductId === p.id 
                           ? (p.imagenes && p.imagenes.length >= 3)
-                            ? 'bg-gradient-to-r from-red-50 to-pink-50 scale-[1.01] shadow-lg border-red-300 ring-2 ring-red-400 ring-opacity-50'
-                            : 'bg-gradient-to-r from-blue-50 to-indigo-50 scale-[1.01] shadow-lg border-blue-300 ring-2 ring-blue-400 ring-opacity-50'
+                            ? 'bg-gradient-to-r from-red-50 via-pink-50 to-red-50 scale-[1.02] shadow-2xl border-2 border-red-400 ring-4 ring-red-300 ring-opacity-30'
+                            : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 scale-[1.02] shadow-2xl border-2 border-blue-400 ring-4 ring-blue-300 ring-opacity-30'
                           : 'hover:bg-gray-50'
                       }`}
                       onDragOver={(e) => handleDragOver(e, p.id)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, p)}
                     >
+                      {/* Overlay cuando se arrastra sobre el producto */}
+                      {dragOverProductId === p.id && (
+                        <td colSpan="100%" className="absolute inset-0 pointer-events-none z-10">
+                          <div className={`absolute inset-0 flex items-center justify-center ${
+                            (p.imagenes && p.imagenes.length >= 3)
+                              ? 'bg-red-500/10 backdrop-blur-sm'
+                              : 'bg-blue-500/10 backdrop-blur-sm'
+                          }`}>
+                            <div className={`flex items-center gap-3 px-6 py-3 rounded-xl shadow-2xl border-2 ${
+                              (p.imagenes && p.imagenes.length >= 3)
+                                ? 'bg-gradient-to-r from-red-100 to-pink-100 border-red-300 text-red-800'
+                                : 'bg-gradient-to-r from-blue-100 to-indigo-100 border-blue-300 text-blue-800'
+                            }`}>
+                              {(p.imagenes && p.imagenes.length >= 3) ? (
+                                <>
+                                  <svg className="w-6 h-6 text-red-600 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.64-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                  </svg>
+                                  <div>
+                                    <div className="font-bold text-lg">Límite alcanzado</div>
+                                    <div className="text-sm">Este producto ya tiene 3/3 imágenes</div>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="w-8 h-8 text-blue-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  <div>
+                                    <div className="font-bold text-lg flex items-center gap-2">
+                                      <span>Soltar imágenes aquí</span>
+                                      <svg className="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                      </svg>
+                                    </div>
+                                    <div className="text-sm">
+                                      {p.imagenes && p.imagenes.length > 0 
+                                        ? `${p.imagenes.length}/3 imágenes - ${3 - p.imagenes.length} espacio${3 - p.imagenes.length !== 1 ? 's' : ''} disponible${3 - p.imagenes.length !== 1 ? 's' : ''}`
+                                        : 'Hasta 3 imágenes permitidas'
+                                      }
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                      )}
+                    
                       <td className="p-4 align-middle text-sm text-default-600 last:text-right last:rtl:text-left font-normal [&:has([role=checkbox])]:ltr:pr-0 [&:has([role=checkbox])]:rtl:pl-0">
                         <div className="flex items-center justify-center">
                           <input
@@ -5301,6 +5410,7 @@ const ProductosPage = () => {
         fileName={draggedImage?.name}
         producto={targetProduct}
         uploading={uploadingImage}
+        uploadProgress={uploadProgress}
       />
 
       {/* Notificación Toast */}
