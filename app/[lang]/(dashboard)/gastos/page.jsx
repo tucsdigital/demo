@@ -1271,17 +1271,16 @@ const GastosPage = () => {
 
               <div>
                 <Label>Método de Pago</Label>
-                <Select value={metodoPago} onValueChange={setMetodoPago}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Seleccionar método" />
-                  </SelectTrigger>
-                  <SelectContent position="popper" sideOffset={5}>
-                    <SelectItem value="Efectivo">Efectivo</SelectItem>
-                    <SelectItem value="Transferencia">Transferencia</SelectItem>
-                    <SelectItem value="Cheque">Cheque</SelectItem>
-                    <SelectItem value="Tarjeta">Tarjeta</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  value={metodoPago} 
+                  onChange={(e) => setMetodoPago(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Transferencia">Transferencia</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="Tarjeta">Tarjeta</option>
+                </select>
               </div>
 
               <div>
