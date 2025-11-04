@@ -81,8 +81,7 @@ export default function CrearObraPage() {
     barrio: "",
     area: "",
     lote: "",
-    descripcion: "",
-    esClienteViejo: false,
+    descripcion: ""
   });
   const [activeTabCliente, setActiveTabCliente] = useState("datos");
 
@@ -486,14 +485,13 @@ export default function CrearObraPage() {
       barrio: nuevoCliente.barrio || "",
       area: nuevoCliente.area || "",
       lote: nuevoCliente.lote || "",
-      descripcion: nuevoCliente.descripcion || "",
-      esClienteViejo: nuevoCliente.esClienteViejo || false,
+      descripcion: nuevoCliente.descripcion || ""
     };
     const docRef = await addDoc(collection(db, "clientes"), clienteObj);
     const agregado = { ...clienteObj, id: docRef.id };
     setClientes((prev) => [...prev, agregado]);
     setClienteId(docRef.id);
-    setNuevoCliente({ nombre: "", cuit: "", direccion: "", telefono: "", email: "", localidad: "", partido: "", barrio: "", area: "", lote: "", descripcion: "", esClienteViejo: false });
+    setNuevoCliente({ nombre: "", cuit: "", direccion: "", telefono: "", email: "", localidad: "", partido: "", barrio: "", area: "", lote: "", descripcion: "" });
     setOpenNuevoCliente(false);
     setDropdownClientesOpen(false);
   };
@@ -1272,10 +1270,6 @@ export default function CrearObraPage() {
             <div className="flex-1 overflow-y-auto">
               {activeTabCliente === "datos" && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <input type="checkbox" id="esClienteViejo" checked={nuevoCliente.esClienteViejo} onChange={(e) => setNuevoCliente({ ...nuevoCliente, esClienteViejo: e.target.checked })} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                    <label htmlFor="esClienteViejo" className="text-sm font-medium text-blue-800 dark:text-blue-200">¿Es un cliente antiguo?</label>
-                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre *</label>

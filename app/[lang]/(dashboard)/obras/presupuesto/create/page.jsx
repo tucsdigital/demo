@@ -84,8 +84,7 @@ export default function CrearPresupuestoObraPage() {
     barrio: "",
     area: "",
     lote: "",
-    descripcion: "",
-    esClienteViejo: false,
+    descripcion: ""
   });
   const [activeTab, setActiveTab] = useState("datos");
 
@@ -463,14 +462,13 @@ export default function CrearPresupuestoObraPage() {
       barrio: nuevoCliente.barrio || "",
       area: nuevoCliente.area || "",
       lote: nuevoCliente.lote || "",
-      descripcion: nuevoCliente.descripcion || "",
-      esClienteViejo: nuevoCliente.esClienteViejo || false,
+      descripcion: nuevoCliente.descripcion || ""
     };
     const docRef = await addDoc(collection(db, "clientes"), clienteObj);
     const agregado = { ...clienteObj, id: docRef.id };
     setClientes((prev) => [...prev, agregado]);
     setClienteId(docRef.id);
-    setNuevoCliente({ nombre: "", cuit: "", direccion: "", telefono: "", email: "", localidad: "", partido: "", barrio: "", area: "", lote: "", descripcion: "", esClienteViejo: false });
+    setNuevoCliente({ nombre: "", cuit: "", direccion: "", telefono: "", email: "", localidad: "", partido: "", barrio: "", area: "", lote: "", descripcion: "" });
     setOpenNuevoCliente(false);
     setDropdownClientesOpen(false);
   };
@@ -1095,10 +1093,6 @@ export default function CrearPresupuestoObraPage() {
             <div className="flex-1 overflow-y-auto">
               {activeTab === "datos" && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <input type="checkbox" id="esClienteViejo" checked={nuevoCliente.esClienteViejo} onChange={(e) => setNuevoCliente({ ...nuevoCliente, esClienteViejo: e.target.checked })} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                    <label htmlFor="esClienteViejo" className="text-sm font-medium text-blue-800 dark:text-blue-200">¿Es un cliente antiguo?</label>
-                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre *</label>
@@ -1170,7 +1164,7 @@ export default function CrearPresupuestoObraPage() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setOpenNuevoCliente(false)} className="text-sm">Cancelar</Button>
-                <Button variant="default" onClick={async () => { if (!nuevoCliente.nombre || !nuevoCliente.direccion || !nuevoCliente.telefono) { alert("Nombre, dirección y teléfono son obligatorios"); return; } const clienteObj = { nombre: nuevoCliente.nombre, cuit: nuevoCliente.cuit || "", direccion: nuevoCliente.direccion, telefono: nuevoCliente.telefono, email: nuevoCliente.email || "", localidad: nuevoCliente.localidad || "", partido: nuevoCliente.partido || "", barrio: nuevoCliente.barrio || "", area: nuevoCliente.area || "", lote: nuevoCliente.lote || "", descripcion: nuevoCliente.descripcion || "", esClienteViejo: nuevoCliente.esClienteViejo || false, }; const docRef = await addDoc(collection(db, "clientes"), clienteObj); setClientes([ ...clientes, { ...clienteObj, id: docRef.id }, ]); setClienteId(docRef.id); setNuevoCliente({ nombre: "", cuit: "", direccion: "", telefono: "", email: "", localidad: "", partido: "", barrio: "", area: "", lote: "", descripcion: "", esClienteViejo: false, }); setOpenNuevoCliente(false); setDropdownClientesOpen(false); }} disabled={!nuevoCliente.nombre || !nuevoCliente.direccion || !nuevoCliente.telefono} className="text-sm">Guardar Cliente</Button>
+                <Button variant="default" onClick={async () => { if (!nuevoCliente.nombre || !nuevoCliente.direccion || !nuevoCliente.telefono) { alert("Nombre, dirección y teléfono son obligatorios"); return; } const clienteObj = { nombre: nuevoCliente.nombre, cuit: nuevoCliente.cuit || "", direccion: nuevoCliente.direccion, telefono: nuevoCliente.telefono, email: nuevoCliente.email || "", localidad: nuevoCliente.localidad || "", partido: nuevoCliente.partido || "", barrio: nuevoCliente.barrio || "", area: nuevoCliente.area || "", lote: nuevoCliente.lote || "", descripcion: nuevoCliente.descripcion || "" }; const docRef = await addDoc(collection(db, "clientes"), clienteObj); setClientes([ ...clientes, { ...clienteObj, id: docRef.id }, ]); setClienteId(docRef.id); setNuevoCliente({ nombre: "", cuit: "", direccion: "", telefono: "", email: "", localidad: "", partido: "", barrio: "", area: "", lote: "", descripcion: "" }); setOpenNuevoCliente(false); setDropdownClientesOpen(false); }} disabled={!nuevoCliente.nombre || !nuevoCliente.direccion || !nuevoCliente.telefono} className="text-sm">Guardar Cliente</Button>
               </div>
             </div>
           </div>

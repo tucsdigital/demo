@@ -25,8 +25,10 @@ const SalesStats = () => {
   const [ventasData, setVentasData] = useState([]);
   const [presupuestosData, setPresupuestosData] = useState([]);
   const [obrasData, setObrasData] = useState([]);
+  const [gastosData, setGastosData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [clientesData, setClientesData] = useState({});
+  const [clientesArray, setClientesArray] = useState([]);
   const COMMISSION_RATE = 2.5; // % comisión fija para todos los clientes
   const OBRAS_COMMISSION_RATE = 2.5; // % comisión fija para obras
 
@@ -88,12 +90,20 @@ const SalesStats = () => {
         setObrasData(
           obrasSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
         );
+        const gastosSnap = await getDocs(collection(db, "gastos"));
+        setGastosData(
+          gastosSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+        );
         const clientesSnap = await getDocs(collection(db, "clientes"));
         const map = {};
+        const arr = [];
         clientesSnap.docs.forEach((d) => {
-          map[d.id] = { id: d.id, ...d.data() };
+          const clienteData = { id: d.id, ...d.data() };
+          map[d.id] = clienteData;
+          arr.push(clienteData);
         });
         setClientesData(map);
+        setClientesArray(arr);
       } catch (error) {
         console.error("Error al cargar datos de estadísticas:", error);
       } finally {
@@ -160,6 +170,30 @@ const SalesStats = () => {
       0
     );
     const ticketPromedio = ventasCount > 0 ? ventasMonto / ventasCount : 0;
+
+    // Ventas del día de hoy
+    const ventasDelDia = (ventasData || []).filter(v => {
+      const fechaVenta = v.fecha || v.fechaCreacion;
+      return toDateSafe(fechaVenta)?.toISOString().split("T")[0] === hoyISO;
+    });
+    const ventasDelDiaCount = ventasDelDia.length;
+    const ventasDelDiaMonto = ventasDelDia.reduce((acc, v) => acc + (Number(v.total) || 0), 0);
+
+    // Gastos del día de hoy
+    const gastosDelDia = (gastosData || []).filter(g => {
+      const fechaGasto = formatFechaSegura(g.fecha);
+      return fechaGasto === hoyISO;
+    });
+    const gastosDelDiaCount = gastosDelDia.length;
+    const gastosDelDiaMonto = gastosDelDia.reduce((acc, g) => acc + (Number(g.monto) || 0), 0);
+
+    // Nuevos clientes del mes actual
+    const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const nuevosClientesMes = (clientesArray || []).filter(c => {
+      if (!c.fechaCreacion) return false;
+      const fechaCreacion = new Date(c.fechaCreacion);
+      return fechaCreacion >= inicioMes;
+    }).length;
 
     // Calcular totales de obras
     const obrasCount = obrasFiltradas.length;
@@ -247,6 +281,11 @@ const SalesStats = () => {
       ventasCount,
       ventasMonto,
       ticketPromedio,
+      ventasDelDiaCount,
+      ventasDelDiaMonto,
+      gastosDelDiaCount,
+      gastosDelDiaMonto,
+      nuevosClientesMes,
       estados,
       envios,
       formasPago,
@@ -261,6 +300,11 @@ const SalesStats = () => {
     ventasFiltradas,
     presupuestosFiltrados,
     obrasFiltradas,
+    ventasData,
+    gastosData,
+    clientesArray,
+    hoyISO,
+    toDateSafe,
     OBRAS_COMMISSION_RATE,
   ]);
 
@@ -347,22 +391,15 @@ const SalesStats = () => {
 
   // Clientes nuevos vs viejos (solo clientes que aparecen en ventas del rango)
   const clientesCounts = useMemo(() => {
-    let nuevo = 0;
-    let viejo = 0;
     const ids = new Set(
       (ventasFiltradas || []).map((v) => v.clienteId).filter(Boolean)
     );
-    ids.forEach((id) => {
-      const c = clientesData[id];
-      if (!c) return;
-      if (c.esClienteViejo) viejo += 1;
-      else nuevo += 1;
-    });
-    return { nuevo, viejo };
+    const total = ids.size;
+    return { nuevo: 0, viejo: 0, total };
   }, [ventasFiltradas, clientesData]);
 
   const clientesTotal = useMemo(
-    () => clientesCounts.nuevo + clientesCounts.viejo,
+    () => clientesCounts.total || 0,
     [clientesCounts]
   );
 
@@ -804,6 +841,95 @@ const SalesStats = () => {
               </div>
             </div>
 
+            {/* Nuevas métricas del día y mes */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              {/* Ventas del día */}
+              <div className="p-3 md:p-4 rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/40 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs md:text-sm text-blue-700 font-semibold">
+                    Ventas HOY
+                  </div>
+                  <span className="inline-flex w-6 h-6 md:w-8 md:h-8 items-center justify-center rounded-md bg-blue-500/15 text-blue-600">
+                    <Icon
+                      icon="heroicons:calendar"
+                      className="w-3 h-3 md:w-4 md:h-4"
+                    />
+                  </span>
+                </div>
+                <div className="text-xl md:text-2xl font-extrabold tracking-tight text-blue-700">
+                  {kpis.ventasDelDiaCount}
+                </div>
+                <div className="text-xs text-blue-600 mt-1">
+                  ${nf.format(Math.round(kpis.ventasDelDiaMonto))}
+                </div>
+              </div>
+
+              {/* Gastos del día */}
+              <div className="p-3 md:p-4 rounded-xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100/40 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs md:text-sm text-red-700 font-semibold">
+                    Gastos HOY
+                  </div>
+                  <span className="inline-flex w-6 h-6 md:w-8 md:h-8 items-center justify-center rounded-md bg-red-500/15 text-red-600">
+                    <Icon
+                      icon="heroicons:receipt-percent"
+                      className="w-3 h-3 md:w-4 md:h-4"
+                    />
+                  </span>
+                </div>
+                <div className="text-xl md:text-2xl font-extrabold tracking-tight text-red-700">
+                  {kpis.gastosDelDiaCount}
+                </div>
+                <div className="text-xs text-red-600 mt-1">
+                  ${nf.format(Math.round(kpis.gastosDelDiaMonto))}
+                </div>
+              </div>
+
+              {/* Nuevos clientes del mes */}
+              <div className="p-3 md:p-4 rounded-xl border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100/40 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs md:text-sm text-teal-700 font-semibold">
+                    Nuevos Clientes
+                  </div>
+                  <span className="inline-flex w-6 h-6 md:w-8 md:h-8 items-center justify-center rounded-md bg-teal-500/15 text-teal-600">
+                    <Icon
+                      icon="heroicons:user-plus"
+                      className="w-3 h-3 md:w-4 md:h-4"
+                    />
+                  </span>
+                </div>
+                <div className="text-xl md:text-2xl font-extrabold tracking-tight text-teal-700">
+                  {kpis.nuevosClientesMes}
+                </div>
+                <div className="text-xs text-teal-600 mt-1">
+                  Este mes
+                </div>
+              </div>
+
+              {/* Balance del día */}
+              <div className="p-3 md:p-4 rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/40 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs md:text-sm text-purple-700 font-semibold">
+                    Balance HOY
+                  </div>
+                  <span className="inline-flex w-6 h-6 md:w-8 md:h-8 items-center justify-center rounded-md bg-purple-500/15 text-purple-600">
+                    <Icon
+                      icon="heroicons:scale"
+                      className="w-3 h-3 md:w-4 md:h-4"
+                    />
+                  </span>
+                </div>
+                <div className={`text-lg md:text-2xl font-extrabold tracking-tight break-all ${
+                  (kpis.ventasDelDiaMonto - kpis.gastosDelDiaMonto) >= 0 ? 'text-green-700' : 'text-red-700'
+                }`}>
+                  ${nf.format(Math.round(kpis.ventasDelDiaMonto - kpis.gastosDelDiaMonto))}
+                </div>
+                <div className="text-xs text-purple-600 mt-1">
+                  Ingresos - Gastos
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {/* Comisión por ventas */}
               {/* <div className="p-3 md:p-4 rounded-xl border border-default-200 bg-gradient-to-br from-fuchsia-50 to-fuchsia-100/40 dark:from-fuchsia-900/20 dark:to-fuchsia-900/10 shadow-sm">
@@ -1061,8 +1187,11 @@ const SalesStats = () => {
             </div>
 
             {/* Top productos (monto) */}
-            {/* <div className="p-4 rounded-xl border border-default-200 bg-card shadow-sm">
-              <div className="text-sm font-semibold mb-2">Top productos (monto)</div>
+            <div className="p-4 rounded-xl border border-default-200 bg-card shadow-sm">
+              <div className="text-sm md:text-base font-semibold mb-3 flex items-center gap-2">
+                <Icon icon="heroicons:trophy" className="w-5 h-5 text-amber-500" />
+                Top 5 Productos Más Vendidos
+              </div>
               {kpis.topProductos.length === 0 ? (
                 <div className="text-default-500 text-sm">Sin datos en el rango</div>
               ) : (
@@ -1073,7 +1202,12 @@ const SalesStats = () => {
                       className="flex items-center justify-between gap-4 p-3 rounded-lg border border-default-200 bg-default-50/50 hover:bg-default-100/60 shadow-sm transition-colors"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="w-7 h-7 rounded-full bg-primary/10 text-primary ring-1 ring-primary/20 flex items-center justify-center text-xs font-bold">
+                        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                          idx === 0 ? 'bg-amber-500/20 text-amber-700 ring-2 ring-amber-500/30' :
+                          idx === 1 ? 'bg-gray-400/20 text-gray-700 ring-2 ring-gray-400/30' :
+                          idx === 2 ? 'bg-orange-500/20 text-orange-700 ring-2 ring-orange-500/30' :
+                          'bg-primary/10 text-primary ring-1 ring-primary/20'
+                        }`}>
                           {idx + 1}
                         </span>
                         <div className="truncate">
@@ -1086,7 +1220,7 @@ const SalesStats = () => {
                   ))}
                 </div>
               )}
-            </div> */}
+            </div>
           </>
         )}
       </CardContent>

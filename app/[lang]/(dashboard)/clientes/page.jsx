@@ -35,8 +35,7 @@ const ClientesPage = () => {
     barrio: "", 
     area: "", 
     lote: "", 
-    descripcion: "",
-    esClienteViejo: false
+    descripcion: ""
   });
   const [saving, setSaving] = useState(false);
   const [editCliente, setEditCliente] = useState(null);
@@ -73,11 +72,11 @@ const ClientesPage = () => {
     setEditCliente({ ...cliente, estado: "Activo" });
     setEditMsg("");
     setDetalleOpen(true);
-    // Consultar ventas asociadas por clienteId
-    const ventasSnap = await getDocs(query(collection(db, "ventas"), where("clienteId", "==", cliente.id)));
+    // Consultar ventas asociadas por teléfono del cliente
+    const ventasSnap = await getDocs(query(collection(db, "ventas"), where("cliente.telefono", "==", cliente.telefono)));
     setVentas(ventasSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    // Consultar presupuestos asociados por cliente.cuit
-    const presupuestosSnap = await getDocs(query(collection(db, "presupuestos"), where("cliente.cuit", "==", cliente.cuit)));
+    // Consultar presupuestos asociados por teléfono del cliente
+    const presupuestosSnap = await getDocs(query(collection(db, "presupuestos"), where("cliente.telefono", "==", cliente.telefono)));
     setPresupuestos(presupuestosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
   };
 
@@ -85,7 +84,7 @@ const ClientesPage = () => {
     if (!form.nombre || !form.direccion || !form.telefono) return;
     setSaving(true);
     await addDoc(collection(db, "clientes"), form);
-    setForm({ nombre: "", cuit: "", direccion: "", telefono: "", email: "", estado: "Activo", localidad: "", partido: "", barrio: "", area: "", lote: "", descripcion: "", esClienteViejo: false });
+    setForm({ nombre: "", cuit: "", direccion: "", telefono: "", email: "", estado: "Activo", localidad: "", partido: "", barrio: "", area: "", lote: "", descripcion: "" });
     setOpen(false);
     // Refrescar lista
     const snap = await getDocs(collection(db, "clientes"));
@@ -140,14 +139,13 @@ const ClientesPage = () => {
                 <TableHead>Dirección</TableHead>
                 <TableHead>Teléfono</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Tipo</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={8}>Cargando...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7}>Cargando...</TableCell></TableRow>
               ) : clientes.filter(c => c.nombre.toLowerCase().includes(filtro.toLowerCase()) || (c.cuit || "").includes(filtro)).map(c => (
                 <TableRow key={c.id}>
                   <TableCell>{c.nombre}</TableCell>
@@ -155,7 +153,6 @@ const ClientesPage = () => {
                   <TableCell>{c.direccion}</TableCell>
                   <TableCell>{c.telefono}</TableCell>
                   <TableCell>{c.email}</TableCell>
-                  <TableCell>{c.esClienteViejo ? "Antiguo" : "Nuevo"}</TableCell>
                   <TableCell>{c.estado}</TableCell>
                   <TableCell>
                     <Button size="sm" variant="outline" onClick={() => handleVerDetalle(c)}>Ver</Button>
@@ -216,12 +213,12 @@ const ClientesPage = () => {
               {activeTab === 'datos' && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Nombre *
                       </label>
                       <Input 
-                        placeholder="Nombre completo" 
+                        placeholder="Nombre completo del cliente" 
                         value={form.nombre} 
                         onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} 
                         required 
@@ -232,17 +229,30 @@ const ClientesPage = () => {
                         CUIT / DNI
                       </label>
                       <Input 
-                        placeholder="CUIT o DNI" 
+                        placeholder="Ej: 20-12345678-9" 
                         value={form.cuit} 
                         onChange={e => setForm(f => ({ ...f, cuit: e.target.value }))} 
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Estado
+                      </label>
+                      <select 
+                        className="w-full border rounded-md px-3 py-2 h-10" 
+                        value={form.estado} 
+                        onChange={e => setForm(f => ({ ...f, estado: e.target.value }))}
+                      >
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Teléfono *
                       </label>
                       <Input 
-                        placeholder="Teléfono" 
+                        placeholder="Ej: 221-555-1234" 
                         value={form.telefono} 
                         onChange={e => setForm(f => ({ ...f, telefono: e.target.value }))} 
                         required 
@@ -253,73 +263,36 @@ const ClientesPage = () => {
                         Email
                       </label>
                       <Input 
-                        placeholder="Email" 
+                        placeholder="Ej: cliente@email.com" 
                         type="email"
                         value={form.email} 
                         onChange={e => setForm(f => ({ ...f, email: e.target.value }))} 
                       />
                     </div>
                   </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dirección *
-                    </label>
-                    <Input 
-                      placeholder="Dirección completa" 
-                      value={form.direccion} 
-                      onChange={e => setForm(f => ({ ...f, direccion: e.target.value }))} 
-                      required 
-                    />
-                  </div>
-
-                  {/* Checkbox para cliente antiguo */}
-                  <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <input
-                      type="checkbox"
-                      id="esClienteViejo"
-                      checked={form.esClienteViejo}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          esClienteViejo: e.target.checked,
-                        })
-                      }
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <label
-                      htmlFor="esClienteViejo"
-                      className="text-sm font-medium text-blue-800 dark:text-blue-200"
-                    >
-                      ¿Es un cliente antiguo?
-                    </label>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Estado
-                    </label>
-                    <select 
-                      className="w-full border rounded-md px-3 py-2" 
-                      value={form.estado} 
-                      onChange={e => setForm(f => ({ ...f, estado: e.target.value }))}
-                    >
-                      <option value="Activo">Activo</option>
-                      <option value="Inactivo">Inactivo</option>
-                    </select>
-                  </div>
                 </div>
               )}
 
               {activeTab === 'ubicacion' && (
                 <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dirección *
+                    </label>
+                    <Input 
+                      placeholder="Calle, número, piso, depto." 
+                      value={form.direccion} 
+                      onChange={e => setForm(f => ({ ...f, direccion: e.target.value }))} 
+                      required 
+                    />
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Localidad
                       </label>
                       <Input 
-                        placeholder="Localidad" 
+                        placeholder="Ej: La Plata" 
                         value={form.localidad} 
                         onChange={e => setForm(f => ({ ...f, localidad: e.target.value }))} 
                       />
@@ -329,39 +302,19 @@ const ClientesPage = () => {
                         Partido
                       </label>
                       <Input 
-                        placeholder="Partido" 
+                        placeholder="Ej: La Plata" 
                         value={form.partido} 
                         onChange={e => setForm(f => ({ ...f, partido: e.target.value }))} 
                       />
                     </div>
-                    <div>
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Barrio
                       </label>
                       <Input 
-                        placeholder="Barrio" 
+                        placeholder="Ej: Centro, Tolosa, etc." 
                         value={form.barrio} 
                         onChange={e => setForm(f => ({ ...f, barrio: e.target.value }))} 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Área
-                      </label>
-                      <Input 
-                        placeholder="Área" 
-                        value={form.area} 
-                        onChange={e => setForm(f => ({ ...f, area: e.target.value }))} 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Lote
-                      </label>
-                      <Input 
-                        placeholder="Lote" 
-                        value={form.lote} 
-                        onChange={e => setForm(f => ({ ...f, lote: e.target.value }))} 
                       />
                     </div>
                   </div>
@@ -372,14 +325,18 @@ const ClientesPage = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Descripción
+                      Notas y observaciones
                     </label>
                     <Textarea 
-                      placeholder="Información adicional sobre el cliente" 
+                      placeholder="Información adicional, preferencias del cliente, referencias, horarios de contacto, etc." 
                       value={form.descripcion} 
                       onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} 
-                      rows={4}
+                      rows={6}
+                      className="resize-none"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Este campo es opcional y puede ser usado para guardar cualquier información relevante sobre el cliente.
+                    </p>
                   </div>
                 </div>
               )}
@@ -540,65 +497,47 @@ const ClientesPage = () => {
                     {/* Ubicación */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3">
                       <h4 className="text-sm font-semibold text-gray-900 mb-3">Ubicación</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-3">
                         <div>
                           <Label htmlFor="direccion">Dirección *</Label>
                           <Input
                             id="direccion"
-                            placeholder="Calle, número, piso..."
+                            placeholder="Calle, número, piso, depto."
                             className="w-full h-9 rounded-lg"
                             value={editCliente.direccion || ""}
                             onChange={(e) => setEditCliente((c) => ({ ...c, direccion: e.target.value }))}
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="localidad">Localidad</Label>
-                          <Input
-                            id="localidad"
-                            placeholder="Ej: La Plata"
-                            className="w-full h-9 rounded-lg"
-                            value={editCliente.localidad || ""}
-                            onChange={(e) => setEditCliente((c) => ({ ...c, localidad: e.target.value }))}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="partido">Partido</Label>
-                          <Input
-                            id="partido"
-                            placeholder="Ej: La Plata"
-                            className="w-full h-9 rounded-lg"
-                            value={editCliente.partido || ""}
-                            onChange={(e) => setEditCliente((c) => ({ ...c, partido: e.target.value }))}
-                          />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="localidad">Localidad</Label>
+                            <Input
+                              id="localidad"
+                              placeholder="Ej: La Plata"
+                              className="w-full h-9 rounded-lg"
+                              value={editCliente.localidad || ""}
+                              onChange={(e) => setEditCliente((c) => ({ ...c, localidad: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="partido">Partido</Label>
+                            <Input
+                              id="partido"
+                              placeholder="Ej: La Plata"
+                              className="w-full h-9 rounded-lg"
+                              value={editCliente.partido || ""}
+                              onChange={(e) => setEditCliente((c) => ({ ...c, partido: e.target.value }))}
+                            />
+                          </div>
                         </div>
                         <div>
                           <Label htmlFor="barrio">Barrio</Label>
                           <Input
                             id="barrio"
-                            placeholder="Ej: Centro"
+                            placeholder="Ej: Centro, Tolosa, etc."
                             className="w-full h-9 rounded-lg"
                             value={editCliente.barrio || ""}
                             onChange={(e) => setEditCliente((c) => ({ ...c, barrio: e.target.value }))}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="area">Área</Label>
-                          <Input
-                            id="area"
-                            placeholder="Ej: Manzana 3"
-                            className="w-full h-9 rounded-lg"
-                            value={editCliente.area || ""}
-                            onChange={(e) => setEditCliente((c) => ({ ...c, area: e.target.value }))}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="lote">Lote</Label>
-                          <Input
-                            id="lote"
-                            placeholder="Ej: 12"
-                            className="w-full h-9 rounded-lg"
-                            value={editCliente.lote || ""}
-                            onChange={(e) => setEditCliente((c) => ({ ...c, lote: e.target.value }))}
                           />
                         </div>
                       </div>
@@ -607,7 +546,7 @@ const ClientesPage = () => {
                     {/* Información adicional */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3">
                       <h4 className="text-sm font-semibold text-gray-900 mb-3">Información adicional</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-3">
                         <div className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                           <div>
                             <p className="text-sm font-medium text-gray-700">Estado</p>
@@ -624,23 +563,11 @@ const ClientesPage = () => {
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                          <div>
-                            <p className="text-sm font-medium text-gray-700">Cliente antiguo</p>
-                            <p className="text-xs text-gray-500">Marca si ya existía previo al sistema</p>
-                          </div>
-                          <Switch
-                            checked={editCliente.esClienteViejo || false}
-                            onCheckedChange={(checked) => setEditCliente((c) => ({ ...c, esClienteViejo: checked }))}
-                            aria-label="Cliente antiguo"
-                          />
-                        </div>
-
-                        <div className="md:col-span-2">
-                          <Label htmlFor="descripcion">Descripción</Label>
+                        <div>
+                          <Label htmlFor="descripcion">Notas y observaciones</Label>
                           <Textarea
                             id="descripcion"
-                            placeholder="Notas, preferencias, referencias..."
+                            placeholder="Información adicional, preferencias del cliente, referencias..."
                             className="w-full rounded-lg h-24"
                             rows={3}
                             value={editCliente.descripcion || ""}

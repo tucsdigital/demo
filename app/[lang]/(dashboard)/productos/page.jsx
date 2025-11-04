@@ -2768,6 +2768,7 @@ const ProductosPage = () => {
       "precioPorPie",
       "stock",
       "estado",
+      "estadoTienda",
       "ubicacion"
     ];
 
@@ -2789,6 +2790,7 @@ const ProductosPage = () => {
         producto.precioPorPie || "",
         producto.stock || "",
         producto.estado || "Activo",
+        producto.estadoTienda || "Inactivo",
         producto.ubicacion || ""
       ].map(field => `"${field}"`).join(",");
       
@@ -2886,6 +2888,7 @@ const ProductosPage = () => {
       "categoria",
       "subCategoria",
       "estado",
+      "estadoTienda",
       "unidad",
       "stockMinimo",
       "unidadMedida",
@@ -2904,6 +2907,7 @@ const ProductosPage = () => {
         producto.categoria || "Obras",
         producto.subCategoria || "",
         producto.estado || "Activo",
+        producto.estadoTienda || "Inactivo",
         producto.unidad || "",
         producto.stockMinimo || "",
         producto.unidadMedida || "",
@@ -3049,13 +3053,18 @@ const ProductosPage = () => {
 
   const handleCantidadChange = async (id, nuevaCantidad) => {
     try {
-      const cantidad = Math.max(1, parseInt(nuevaCantidad) || 1);
+      // Si el campo está vacío o es inválido, guardar como vacío (null)
+      // Si tiene un valor, asegurarse de que sea al menos 1
+      const cantidad = nuevaCantidad === "" || nuevaCantidad === null || nuevaCantidad === undefined
+        ? null
+        : Math.max(1, parseInt(nuevaCantidad) || 1);
+      
       const productoRef = doc(db, "productos", id);
       await updateDoc(productoRef, {
         cantidad: cantidad,
         fechaActualizacion: new Date().toISOString(),
       });
-      console.log(`Cantidad actualizada para producto ${id}: ${cantidad}`);
+      console.log(`Cantidad actualizada para producto ${id}: ${cantidad || 'vacío (default: 1)'}`);
     } catch (error) {
       console.error("Error al actualizar cantidad:", error);
       alert("Error al actualizar la cantidad: " + error.message);
@@ -3256,6 +3265,27 @@ const ProductosPage = () => {
     } catch (error) {
       console.error("Error al actualizar valor de venta:", error);
       alert("Error al actualizar el valor de venta: " + error.message);
+    }
+  };
+
+  // Función para cambiar el estado de tienda rápidamente
+  const handleToggleEstadoTienda = async (id, estadoActual) => {
+    try {
+      const nuevoEstado = estadoActual === "Activo" ? "Inactivo" : "Activo";
+      const productoRef = doc(db, "productos", id);
+      
+      await updateDoc(productoRef, {
+        estadoTienda: nuevoEstado,
+        fechaActualizacion: new Date().toISOString(),
+      });
+      
+      showToast(
+        `Estado de tienda cambiado a ${nuevoEstado}`,
+        "success"
+      );
+    } catch (error) {
+      console.error("Error al cambiar estado de tienda:", error);
+      showToast("Error al cambiar el estado de tienda", "error");
     }
   };
 
@@ -3623,34 +3653,40 @@ const ProductosPage = () => {
                 )}
               </div>
 
-              {/* Botones de acción para productos seleccionados (solo visible cuando hay selección) */}
-              {selectedProducts.length > 0 && (
-                <>
-                  {/* Botón Editar Masivo */}
-                  <Button
-                    variant="outline"
-                    onClick={openBulkEditModal}
-                    className="w-full sm:w-auto border-2 border-blue-200 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 font-medium text-blue-700"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Editar ({selectedProducts.length})
-                  </Button>
+              {/* Botones de acción para productos seleccionados (siempre visibles) */}
+              {/* Botón Editar Masivo */}
+              <Button
+                variant="outline"
+                onClick={openBulkEditModal}
+                disabled={selectedProducts.length === 0}
+                className={`w-full sm:w-auto border-2 transition-all duration-200 font-medium ${
+                  selectedProducts.length > 0
+                    ? 'border-blue-200 hover:border-blue-500 hover:bg-blue-50 text-blue-700'
+                    : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Editar {selectedProducts.length > 0 ? `(${selectedProducts.length})` : ''}
+              </Button>
 
-                  {/* Botón Borrar Seleccionados */}
-                  <Button
-                    variant="destructive"
-                    onClick={() => setDeleteModalOpen(true)}
-                    className="w-full sm:w-auto bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Borrar ({selectedProducts.length})
-                  </Button>
-                </>
-              )}
+              {/* Botón Borrar Seleccionados */}
+              <Button
+                variant="destructive"
+                onClick={() => setDeleteModalOpen(true)}
+                disabled={selectedProducts.length === 0}
+                className={`w-full sm:w-auto transition-all duration-200 font-medium ${
+                  selectedProducts.length > 0
+                    ? 'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed hover:bg-gray-200'
+                }`}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Borrar {selectedProducts.length > 0 ? `(${selectedProducts.length})` : ''}
+              </Button>
             </div>
           </div>
 
@@ -3896,8 +3932,8 @@ const ProductosPage = () => {
             </div>
           </div>
 
-          {/* Indicador de productos filtrados */}
-          <div className="flex items-center justify-between">
+          {/* Indicador de productos filtrados y banner de ayuda drag & drop */}
+          <div className="flex flex-col gap-3">
             {(filtro || cat || filtroTipoMadera || filtroSubCategoria || filtroTienda || filtroStock) && (
               <Button
                 variant="outline"
@@ -3910,11 +3946,41 @@ const ProductosPage = () => {
                   setFiltroTienda("");
                   setFiltroStock("");
                 }}
-                className="text-xs"
+                className="text-xs w-fit"
               >
                 Limpiar filtros
               </Button>
             )}
+            
+            {/* Banner informativo sobre drag & drop de imágenes */}
+            <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-2 border-blue-200 rounded-xl p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-semibold text-blue-900 mb-1">
+                    💡 Tip: Agregar imágenes a productos
+                  </h4>
+                  <p className="text-xs text-blue-700">
+                    Puedes <strong>arrastrar y soltar</strong> imágenes directamente sobre cualquier producto de la lista para agregarlas. 
+                    Cada producto puede tener hasta <strong>3 imágenes</strong>. 
+                    El indicador de imágenes muestra cuántas ya tiene cada producto.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="p-1 hover:bg-blue-100 rounded-lg transition-colors flex-shrink-0"
+                  title="Cerrar"
+                >
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
@@ -4129,12 +4195,13 @@ const ProductosPage = () => {
                           <input
                             type="number"
                             min="1"
-                            value={p.cantidad || ""}
+                            value={p.cantidad === null || p.cantidad === undefined ? "" : p.cantidad}
                             onChange={(e) => {
                               handleCantidadChange(p.id, e.target.value);
                             }}
-                            className="w-16 text-center border border-gray-300 rounded px-2 py-1 text-sm font-medium bg-white focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                            title="Cantidad"
+                            placeholder="1"
+                            className="w-16 text-center border border-gray-300 rounded px-2 py-1 text-sm font-medium bg-white focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder:text-gray-400"
+                            title="Cantidad (default: 1)"
                           />
                         </div>
                       </td>
@@ -4211,21 +4278,22 @@ const ProductosPage = () => {
                             $
                             {formatearNumeroArgentino(
                               (() => {
+                                // Si cantidad es null/undefined, usar 1 por defecto
+                                const cantidadActual = p.cantidad === null || p.cantidad === undefined ? 1 : Number(p.cantidad) || 1;
                                 const precioUnitario =
                                   p.categoria === "Maderas"
                                     ? (() => {
                                         const unidad = (p.unidadMedida || "").toString();
-                                        const cantidad = Number(p.cantidad) || 1;
                                         if (unidad === "M2") {
                                           return calcularPrecioMachimbre({
                                             alto: Number(p.alto) || 0,
                                             largo: Number(p.largo) || 0,
-                                            cantidad,
+                                            cantidad: cantidadActual,
                                             precioPorPie: Number(p.precioPorPie) || 0,
                                           });
                                         } else if (unidad === "Unidad") {
                                           const pUnit = Math.round((Number(p.precioPorPie) || 0) / 100) * 100;
-                                          return Math.round((pUnit * cantidad) / 100) * 100;
+                                          return Math.round((pUnit * cantidadActual) / 100) * 100;
                                         }
                                         const base = calcularPrecioCorteMadera({
                                           alto: Number(p.alto) || 0,
@@ -4233,11 +4301,11 @@ const ProductosPage = () => {
                                           largo: Number(p.largo) || 0,
                                           precioPorPie: Number(p.precioPorPie) || 0,
                                         });
-                                        return Math.round((base * cantidad) / 100) * 100;
+                                        return Math.round((base * cantidadActual) / 100) * 100;
                                       })()
                                     : p.categoria === "Obras"
-                                    ? (Number(p.valorVenta) || 0) * (Number(p.cantidad) || 1)
-                                    : (Number(p.valorVenta) || 0) * (Number(p.cantidad) || 1);
+                                    ? (Number(p.valorVenta) || 0) * cantidadActual
+                                    : (Number(p.valorVenta) || 0) * cantidadActual;
                                 return precioUnitario;
                               })()
                             )}
@@ -4259,17 +4327,34 @@ const ProductosPage = () => {
                         </span>
                       </td>
                       <td className="p-4 align-middle text-sm text-default-600 last:text-right last:rtl:text-left font-normal [&:has([role=checkbox])]:rtl:pl-0">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            p.estadoTienda === "Activo"
-                              ? "bg-green-100 text-green-800"
-                              : p.estadoTienda === "Inactivo" || !p.estadoTienda
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-700"
-                          }`}
-                        >
-                          {p.estadoTienda || "Inactivo"}
-                        </span>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleToggleEstadoTienda(p.id, p.estadoTienda || "Inactivo")}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                              p.estadoTienda === "Activo"
+                                ? "bg-green-500"
+                                : "bg-gray-300"
+                            }`}
+                            title={`Click para ${p.estadoTienda === "Activo" ? "desactivar" : "activar"} en tienda`}
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                p.estadoTienda === "Activo"
+                                  ? "translate-x-6"
+                                  : "translate-x-1"
+                              }`}
+                            />
+                          </button>
+                          <span
+                            className={`text-xs font-semibold ${
+                              p.estadoTienda === "Activo"
+                                ? "text-green-700"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {p.estadoTienda || "Inactivo"}
+                          </span>
+                        </div>
                       </td>
                       <td className="p-4 align-middle text-sm text-default-600 last:text-right last:rtl:text-left font-normal [&:has([role=checkbox])]:ltr:pr-0 [&:has([role=checkbox])]:rtl:pl-0">
                         <div className="flex gap-2 justify-center">

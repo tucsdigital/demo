@@ -59,7 +59,6 @@ export async function GET(request, { params }) {
       lote: cliente.lote || "",
       lat: cliente.lat || null,
       lng: cliente.lng || null,
-      esClienteViejo: cliente.esClienteViejo || false,
       origen: cliente.origen || "ecommerce",
       creadoEn: cliente.creadoEn || null,
       actualizadoEn: cliente.actualizadoEn || null
