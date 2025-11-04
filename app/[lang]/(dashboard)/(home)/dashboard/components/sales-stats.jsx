@@ -32,6 +32,22 @@ const SalesStats = () => {
   const COMMISSION_RATE = 2.5; // % comisión fija para todos los clientes
   const OBRAS_COMMISSION_RATE = 2.5; // % comisión fija para obras
 
+  // Función helper para formatear fechas de forma segura
+  const formatFechaSegura = useCallback((fecha) => {
+    if (!fecha) return "";
+    try {
+      if (typeof fecha === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fecha)) return fecha;
+      if (fecha && typeof fecha === "object" && fecha.toDate) {
+        return fecha.toDate().toISOString().split("T")[0];
+      }
+      const dateObj = new Date(fecha);
+      if (!isNaN(dateObj.getTime())) return dateObj.toISOString().split("T")[0];
+      return "";
+    } catch (error) {
+      return "";
+    }
+  }, []);
+
   const toDateSafe = useCallback((value) => {
     if (!value) return null;
     try {
@@ -305,6 +321,7 @@ const SalesStats = () => {
     clientesArray,
     hoyISO,
     toDateSafe,
+    formatFechaSegura,
     OBRAS_COMMISSION_RATE,
   ]);
 
