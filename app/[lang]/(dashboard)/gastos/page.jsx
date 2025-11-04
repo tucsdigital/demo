@@ -85,6 +85,7 @@ const GastosPage = () => {
   const [openInterno, setOpenInterno] = useState(false);
   const [openProveedor, setOpenProveedor] = useState(false);
   const [openPago, setOpenPago] = useState(false);
+  const [openHistorial, setOpenHistorial] = useState(false);
   const [editando, setEditando] = useState(null);
   const [cuentaSeleccionada, setCuentaSeleccionada] = useState(null);
   const [guardando, setGuardando] = useState(false);
@@ -93,6 +94,7 @@ const GastosPage = () => {
   const [filtroInterno, setFiltroInterno] = useState("");
   const [filtroProveedor, setFiltroProveedor] = useState("");
   const [filtroEstadoPago, setFiltroEstadoPago] = useState("");
+  const [filtroProveedorId, setFiltroProveedorId] = useState("");
   
   // Selector de proveedor con búsqueda
   const [busquedaProveedor, setBusquedaProveedor] = useState("");
@@ -441,7 +443,48 @@ const GastosPage = () => {
       parcial: cuentasPorPagar.filter(c => c.estadoPago === "parcial").length,
       pagado: cuentasPorPagar.filter(c => c.estadoPago === "pagado").length,
     };
-    return { total, pagado, pendiente, porEstado };
+    
+    // Calcular deudas vencidas
+    const vencidas = cuentasPorPagar.filter(c => {
+      const saldo = (Number(c.monto) || 0) - (Number(c.montoPagado) || 0);
+      return c.fechaVencimiento && 
+             new Date(c.fechaVencimiento) < new Date() && 
+             saldo > 0;
+    });
+    
+    const montoVencido = vencidas.reduce((acc, c) => 
+      acc + ((Number(c.monto) || 0) - (Number(c.montoPagado) || 0)), 0
+    );
+    
+    return { total, pagado, pendiente, porEstado, vencidas: vencidas.length, montoVencido };
+  }, [cuentasPorPagar]);
+
+  // Agrupar cuentas por proveedor
+  const cuentasPorProveedor = useMemo(() => {
+    const grupos = {};
+    
+    cuentasPorPagar.forEach(cuenta => {
+      const provId = cuenta.proveedorId;
+      if (!grupos[provId]) {
+        grupos[provId] = {
+          proveedor: cuenta.proveedor,
+          cuentas: [],
+          total: 0,
+          pagado: 0,
+          pendiente: 0,
+        };
+      }
+      
+      grupos[provId].cuentas.push(cuenta);
+      grupos[provId].total += Number(cuenta.monto) || 0;
+      grupos[provId].pagado += Number(cuenta.montoPagado) || 0;
+    });
+    
+    Object.keys(grupos).forEach(provId => {
+      grupos[provId].pendiente = grupos[provId].total - grupos[provId].pagado;
+    });
+    
+    return Object.values(grupos).sort((a, b) => b.pendiente - a.pendiente);
   }, [cuentasPorPagar]);
 
   // Filtrar datos
@@ -459,9 +502,43 @@ const GastosPage = () => {
       const matchBusqueda = (c.concepto || "").toLowerCase().includes(busqueda) ||
                            (c.proveedor?.nombre || "").toLowerCase().includes(busqueda);
       const matchEstado = !filtroEstadoPago || c.estadoPago === filtroEstadoPago;
-      return matchBusqueda && matchEstado;
+      const matchProveedorId = !filtroProveedorId || c.proveedorId === filtroProveedorId;
+      return matchBusqueda && matchEstado && matchProveedorId;
     });
-  }, [cuentasPorPagar, filtroProveedor, filtroEstadoPago]);
+  }, [cuentasPorPagar, filtroProveedor, filtroEstadoPago, filtroProveedorId]);
+
+  // Exportar reporte de cuentas por pagar
+  const exportarReporteCuentas = () => {
+    if (cuentasPorPagarFiltradas.length === 0) {
+      alert("No hay datos para exportar");
+      return;
+    }
+
+    const datos = cuentasPorPagarFiltradas.map(c => ({
+      Fecha: c.fecha,
+      Proveedor: c.proveedor?.nombre || "",
+      Concepto: c.concepto,
+      "Nº Comprobante": c.numeroComprobante || "",
+      Total: c.monto,
+      Pagado: c.montoPagado || 0,
+      Saldo: (Number(c.monto) || 0) - (Number(c.montoPagado) || 0),
+      Vencimiento: c.fechaVencimiento || "",
+      Estado: c.estadoPago === "pagado" ? "Pagado" : c.estadoPago === "parcial" ? "Pagado Parcial" : "Pendiente",
+    }));
+
+    const csv = [
+      Object.keys(datos[0]).join(','),
+      ...datos.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cuentas-por-pagar_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   if (loading) {
     return (
@@ -651,27 +728,112 @@ const GastosPage = () => {
             
             <Card>
               <CardContent className="p-6">
-                <div className="space-y-1">
-                  <div className="text-sm text-gray-500">Estado de Cuentas</div>
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-red-100 text-red-800">{totalesProveedores.porEstado.pendiente} Pendientes</Badge>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm text-gray-500">Deudas Vencidas</div>
+                    <div className="text-3xl font-bold text-orange-600">
+                      ${totalesProveedores.montoVencido.toLocaleString("es-AR")}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">{totalesProveedores.vencidas} cuentas</div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-yellow-100 text-yellow-800">{totalesProveedores.porEstado.parcial} Parciales</Badge>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-green-100 text-green-800">{totalesProveedores.porEstado.pagado} Pagadas</Badge>
-                  </div>
+                  <AlertCircle className="w-8 h-8 text-orange-500" />
                 </div>
               </CardContent>
             </Card>
           </div>
 
+          {/* Resumen por proveedor */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="w-5 h-5" />
+                Resumen por Proveedor
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {cuentasPorProveedor.map((grupo, idx) => {
+                  const porcentajePagado = grupo.total > 0 ? (grupo.pagado / grupo.total) * 100 : 0;
+                  
+                  return (
+                    <Card 
+                      key={idx} 
+                      className="border-2 hover:border-blue-300 transition-all cursor-pointer"
+                      onClick={() => setFiltroProveedorId(filtroProveedorId === grupo.proveedor?.id ? "" : grupo.proveedor?.id || "")}
+                    >
+                      <CardContent className="p-4">
+                        <div className="mb-3">
+                          <div className="font-bold text-lg flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-blue-600" />
+                            {grupo.proveedor?.nombre || "Sin nombre"}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {grupo.cuentas.length} cuenta{grupo.cuentas.length !== 1 ? 's' : ''} activa{grupo.cuentas.length !== 1 ? 's' : ''}
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Total:</span>
+                            <span className="font-semibold">${grupo.total.toLocaleString("es-AR")}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Pagado:</span>
+                            <span className="font-semibold text-green-600">${grupo.pagado.toLocaleString("es-AR")}</span>
+                          </div>
+                          <div className="flex justify-between border-t pt-2">
+                            <span className="text-gray-600 font-semibold">Pendiente:</span>
+                            <span className={`font-bold ${grupo.pendiente > 0 ? "text-red-600" : "text-gray-400"}`}>
+                              ${grupo.pendiente.toLocaleString("es-AR")}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Barra de progreso */}
+                        <div className="mt-3">
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-green-600 h-2 rounded-full transition-all" 
+                              style={{ width: `${porcentajePagado}%` }}
+                            />
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1 text-center">
+                            {porcentajePagado.toFixed(1)}% pagado
+                          </div>
+                        </div>
+                        
+                        {filtroProveedorId === (grupo.proveedor?.id || "") && (
+                          <div className="mt-2 text-xs text-blue-600 text-center">
+                            ✓ Filtrado
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Tabla cuentas por pagar */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Cuentas por Pagar</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Detalle de Cuentas por Pagar
+              </CardTitle>
               <div className="flex gap-2">
+                {filtroProveedorId && (
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => setFiltroProveedorId("")}
+                    className="text-xs"
+                  >
+                    <X className="w-3 h-3 mr-1" />
+                    Limpiar filtro
+                  </Button>
+                )}
                 <Select value={filtroEstadoPago} onValueChange={setFiltroEstadoPago}>
                   <SelectTrigger className="w-40">
                     <SelectValue placeholder="Estado de pago" />
@@ -689,6 +851,10 @@ const GastosPage = () => {
                   onChange={e => setFiltroProveedor(e.target.value)} 
                   className="w-56" 
                 />
+                <Button variant="outline" onClick={exportarReporteCuentas} disabled={cuentasPorPagarFiltradas.length === 0}>
+                  <Download className="w-4 h-4 mr-1" />
+                  Exportar
+                </Button>
                 <Button onClick={() => setOpenProveedor(true)}>
                   <Plus className="w-4 h-4 mr-1" />
                   Nueva Cuenta
@@ -742,6 +908,20 @@ const GastosPage = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
+                            {c.pagos && c.pagos.length > 0 && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                                onClick={() => {
+                                  setCuentaSeleccionada(c);
+                                  setOpenHistorial(true);
+                                }}
+                                title="Ver historial de pagos"
+                              >
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                            )}
                             {c.estadoPago !== "pagado" && (
                               <Button 
                                 size="sm" 
@@ -752,14 +932,15 @@ const GastosPage = () => {
                                   setMontoPago((Number(c.monto) - Number(c.montoPagado || 0)).toString());
                                   setOpenPago(true);
                                 }}
+                                title="Registrar pago"
                               >
                                 <Wallet className="w-3 h-3" />
                               </Button>
                             )}
-                            <Button size="sm" variant="outline" onClick={() => handleEditarProveedor(c)}>
+                            <Button size="sm" variant="outline" onClick={() => handleEditarProveedor(c)} title="Editar cuenta">
                               <Edit className="w-3 h-3" />
                             </Button>
-                            <Button size="sm" variant="outline" onClick={() => handleEliminar("proveedor", c.id)}>
+                            <Button size="sm" variant="outline" onClick={() => handleEliminar("proveedor", c.id)} title="Eliminar cuenta">
                               <Trash2 className="w-3 h-3" />
                             </Button>
                           </div>
@@ -1098,6 +1279,117 @@ const GastosPage = () => {
               disabled={guardando || !montoPago || Number(montoPago) <= 0}
             >
               {guardando ? "Guardando..." : "Registrar Pago"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para ver historial de pagos */}
+      <Dialog open={openHistorial} onOpenChange={setOpenHistorial}>
+        <DialogContent className="w-[95vw] max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              Historial de Pagos
+            </DialogTitle>
+          </DialogHeader>
+          
+          {cuentaSeleccionada && (
+            <div className="space-y-4 py-2">
+              {/* Info de la cuenta */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200">
+                <div className="font-bold text-lg text-blue-900">{cuentaSeleccionada.proveedor?.nombre}</div>
+                <div className="text-sm text-blue-700 mt-1">{cuentaSeleccionada.concepto}</div>
+                {cuentaSeleccionada.numeroComprobante && (
+                  <div className="text-xs text-blue-600 mt-1">Comprobante: {cuentaSeleccionada.numeroComprobante}</div>
+                )}
+                
+                <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
+                  <div className="bg-white p-2 rounded-md">
+                    <div className="text-xs text-gray-500">Total</div>
+                    <div className="font-bold text-blue-700">${Number(cuentaSeleccionada.monto).toLocaleString("es-AR")}</div>
+                  </div>
+                  <div className="bg-white p-2 rounded-md">
+                    <div className="text-xs text-gray-500">Pagado</div>
+                    <div className="font-bold text-green-600">${Number(cuentaSeleccionada.montoPagado || 0).toLocaleString("es-AR")}</div>
+                  </div>
+                  <div className="bg-white p-2 rounded-md">
+                    <div className="text-xs text-gray-500">Saldo</div>
+                    <div className={`font-bold ${(Number(cuentaSeleccionada.monto) - Number(cuentaSeleccionada.montoPagado || 0)) > 0 ? "text-red-600" : "text-gray-400"}`}>
+                      ${(Number(cuentaSeleccionada.monto) - Number(cuentaSeleccionada.montoPagado || 0)).toLocaleString("es-AR")}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Listado de pagos */}
+              {cuentaSeleccionada.pagos && cuentaSeleccionada.pagos.length > 0 ? (
+                <div className="space-y-2">
+                  <div className="font-semibold text-sm text-gray-700 flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" />
+                    Pagos Registrados ({cuentaSeleccionada.pagos.length})
+                  </div>
+                  <div className="max-h-80 overflow-y-auto space-y-2">
+                    {cuentaSeleccionada.pagos.map((pago, idx) => (
+                      <div 
+                        key={idx} 
+                        className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-green-600 text-lg">
+                                ${Number(pago.monto).toLocaleString("es-AR")}
+                              </span>
+                              <Badge variant="outline" className="text-xs">
+                                {pago.metodo || "Efectivo"}
+                              </Badge>
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {pago.fecha}
+                              </div>
+                              {pago.notas && (
+                                <div className="text-gray-600 italic">"{pago.notas}"</div>
+                              )}
+                              {pago.responsable && (
+                                <div className="text-gray-400">Por: {pago.responsable}</div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            Pago #{idx + 1}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="bg-green-50 p-3 rounded-lg border border-green-200 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-sm text-green-800">Total Pagado:</span>
+                      <span className="font-bold text-lg text-green-600">
+                        ${Number(cuentaSeleccionada.montoPagado || 0).toLocaleString("es-AR")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Wallet className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                  <p>No hay pagos registrados aún</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setOpenHistorial(false);
+              setCuentaSeleccionada(null);
+            }}>
+              Cerrar
             </Button>
           </DialogFooter>
         </DialogContent>
