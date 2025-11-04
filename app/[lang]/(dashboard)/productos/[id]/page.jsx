@@ -590,59 +590,57 @@ const ProductoDetailPage = () => {
                 <label className="text-sm font-medium text-gray-700">
                   Unidad de Medida *
                 </label>
-
                 <div className="flex gap-2">
-                    <select
-                      value={editForm.unidadMedida}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, unidadMedida: e.target.value }))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  <select
+                    value={editForm.unidadMedida}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, unidadMedida: e.target.value }))}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Seleccionar unidad</option>
+                    {unidadesMedida.map((unidad) => (
+                      <option key={unidad} value={unidad}>
+                        {unidad}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAddUnidadMedida(true)}
+                    className="px-3"
+                  >
+                    +
+                  </Button>
+                </div>
+                {showAddUnidadMedida && (
+                  <div className="flex gap-2 mt-2">
+                    <Input
+                      value={newValue}
+                      onChange={(e) => setNewValue(e.target.value)}
+                      placeholder="Nueva unidad de medida"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleAddNewValue('unidadMedida', newValue)}
                     >
-                      <option value="">Seleccionar unidad</option>
-                      {unidadesMedida.map((unidad) => (
-                        <option key={unidad} value={unidad}>
-                          {unidad}
-                        </option>
-                      ))}
-                    </select>
+                      Agregar
+                    </Button>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => setShowAddUnidadMedida(true)}
-                      className="px-3"
+                      onClick={() => {
+                        setShowAddUnidadMedida(false);
+                        setNewValue("");
+                      }}
                     >
-                      +
+                      Cancelar
                     </Button>
                   </div>
-                  {showAddUnidadMedida && (
-                    <div className="flex gap-2 mt-2">
-                      <Input
-                        value={newValue}
-                        onChange={(e) => setNewValue(e.target.value)}
-                        placeholder="Nueva unidad de medida"
-                        className="flex-1"
-                      />
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => handleAddNewValue('unidadMedida', newValue)}
-                      >
-                        Agregar
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setShowAddUnidadMedida(false);
-                          setNewValue("");
-                        }}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
 
               <div className="space-y-2">
