@@ -1292,19 +1292,19 @@ const PresupuestoDetalle = () => {
           style={{ marginBottom: 32 }}
         >
           <img
-            src="/logo-maderera.png"
-            alt="Logo Maderera"
+            src="/tucs-logo-vertical.png"
+            alt="Logo TUCS"
             style={{ height: 60, width: "auto" }}
           />
           <div>
             <h1 className="text-2xl font-bold " style={{ letterSpacing: 1 }}>
-              Maderera Caballero
+              Tucs Digital
             </h1>
             <div className="text-gray-600 text-sm">
               Presupuesto / Cotización
             </div>
             <div className="text-gray-500 text-xs">
-              www.caballeromaderera.com
+              www.tucsdigital.com
             </div>
           </div>
           {/* Header profesional: solo mostrar número de pedido */}

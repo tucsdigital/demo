@@ -1530,8 +1530,8 @@ const VentaDetalle = () => {
           style={{ marginBottom: 32 }}
         >
           <img
-            src="/logo-maderera.png"
-            alt="Logo Maderera"
+            src="/tucs-logo-vertical.png"
+            alt="Logo TUCS"
             style={{ height: 60, width: "auto" }}
           />
           <div>
