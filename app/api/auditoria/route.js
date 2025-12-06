@@ -32,7 +32,7 @@ export async function GET(request) {
     });
     
   } catch (error) {
-    console.error('Error al obtener auditoría:', error);
+    // console.error('Error al obtener auditoría:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
