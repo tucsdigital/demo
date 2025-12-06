@@ -228,7 +228,7 @@ function FormularioProducto({ onClose, onSuccess }) {
         setSubCategoriasUnicas(subCategorias);
       }
     } catch (error) {
-      console.error("Error al cargar datos precargados:", error);
+      // console.error("Error al cargar datos precargados:", error);
     }
   };
 
@@ -261,7 +261,7 @@ function FormularioProducto({ onClose, onSuccess }) {
       setShowAddProveedor(false);
       setNewValue("");
     } catch (error) {
-      console.error("Error al agregar nuevo valor:", error);
+      // console.error("Error al agregar nuevo valor:", error);
     }
   };
 
@@ -367,15 +367,15 @@ function FormularioProducto({ onClose, onSuccess }) {
         // eslint-disable-next-line no-console
         console.groupCollapsed("FormularioProducto › onSubmit");
         // eslint-disable-next-line no-console
-        console.info("Raw data (RHF):", data);
+        // console.info("Raw data (RHF):", data);
         // eslint-disable-next-line no-console
-        console.info("Payload normalizado:", payload);
+        // console.info("Payload normalizado:", payload);
         // eslint-disable-next-line no-console
-        console.info("Campos esperados:", expectedFields);
+        // console.info("Campos esperados:", expectedFields);
         // eslint-disable-next-line no-console
-        console.warn("Faltantes:", missing);
+        // console.warn("Faltantes:", missing);
         // eslint-disable-next-line no-console
-        console.info("Tipos:", typeMap);
+        // console.info("Tipos:", typeMap);
       } finally {
         // eslint-disable-next-line no-console
         console.groupEnd();
@@ -416,9 +416,9 @@ function FormularioProducto({ onClose, onSuccess }) {
       // eslint-disable-next-line no-console
       console.groupCollapsed("FormularioProducto › validation errors");
       // eslint-disable-next-line no-console
-      console.warn("Campos con error:", fieldNames);
+      // console.warn("Campos con error:", fieldNames);
       // eslint-disable-next-line no-console
-      console.warn("Detalle de errores:", errors);
+      // console.warn("Detalle de errores:", errors);
     } finally {
       // eslint-disable-next-line no-console
       console.groupEnd();
@@ -1725,12 +1725,12 @@ const ProductosPage = () => {
       reader.onload = (e) => {
         try {
           const content = e.target.result;
-          console.log("Archivo leído:", file.name, "Tamaño:", file.size);
+          // console.log("Archivo leído:", file.name, "Tamaño:", file.size);
 
           // Si es un archivo CSV, procesar directamente
           if (file.name.toLowerCase().endsWith(".csv")) {
             const lines = content.split("\n");
-            console.log("Líneas CSV encontradas:", lines.length);
+            // console.log("Líneas CSV encontradas:", lines.length);
 
             if (lines.length < 2) {
               reject(
@@ -1744,7 +1744,7 @@ const ProductosPage = () => {
             const headers = lines[0]
               .split(",")
               .map((h) => h.trim().replace(/"/g, ""));
-            console.log("Encabezados detectados:", headers);
+            // console.log("Encabezados detectados:", headers);
 
             const productos = [];
             for (let i = 1; i < lines.length; i++) {
@@ -1800,14 +1800,14 @@ const ProductosPage = () => {
                 // Validar que tenga los campos mínimos
                 if (producto.codigo && producto.nombre && producto.categoria) {
                   productos.push(producto);
-                  console.log("Producto válido agregado:", producto.codigo);
+                  // console.log("Producto válido agregado:", producto.codigo);
                 } else {
-                  console.log("Producto inválido ignorado:", producto);
+                  // console.log("Producto inválido ignorado:", producto);
                 }
               }
             }
 
-            console.log("Total de productos válidos:", productos.length);
+            // console.log("Total de productos válidos:", productos.length);
             resolve(productos);
           } else {
             // Para archivos Excel (.xlsx, .xls), mostrar error por ahora
@@ -1818,13 +1818,13 @@ const ProductosPage = () => {
             );
           }
         } catch (error) {
-          console.error("Error procesando archivo:", error);
+          // console.error("Error procesando archivo:", error);
           reject(error);
         }
       };
 
       reader.onerror = () => {
-        console.error("Error al leer el archivo");
+        // console.error("Error al leer el archivo");
         reject(new Error("Error al leer el archivo"));
       };
 

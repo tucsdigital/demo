@@ -24,8 +24,9 @@ const FIREBASE_CONFIG = {
   projectId: process.env.FIREBASE_PROJECT_ID || "fir-a2d21",
 };
 
+// IMPORTANTE: Usar variables de entorno en producción. Estos valores son solo para desarrollo local.
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "mazalautaro.dev@gmail.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123"; // ⚠️ CAMBIAR EN PRODUCCIÓN
 
 // Inicializar Firebase Client SDK
 let app, db, auth;

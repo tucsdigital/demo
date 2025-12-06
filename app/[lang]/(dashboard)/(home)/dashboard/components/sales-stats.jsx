@@ -486,17 +486,17 @@ const SalesStats = () => {
     const comisionTotal = totalVentasConCliente * (COMMISSION_RATE / 100);
 
     // Debug logs
-    console.log("=== DEBUG COMISIONES ===");
-    console.log("Total ventas filtradas:", ventasFiltradas.length);
-    console.log("Total monto ventas filtradas:", kpis.ventasMonto);
-    console.log("Total ventas procesadas:", totalVentasProcesadas);
-    console.log("Total ventas con cliente:", totalVentasConCliente);
-    console.log(
-      "Ventas con cliente no encontrado:",
-      ventasClienteNoEncontradoIds
-    );
-    console.log("Comisión total (2.5%):", comisionTotal);
-    console.log("========================");
+    // console.log("=== DEBUG COMISIONES ===");
+    // console.log("Total ventas filtradas:", ventasFiltradas.length);
+    // console.log("Total monto ventas filtradas:", kpis.ventasMonto);
+    // console.log("Total ventas procesadas:", totalVentasProcesadas);
+    // console.log("Total ventas con cliente:", totalVentasConCliente);
+    // console.log(
+    //   "Ventas con cliente no encontrado:",
+    //   ventasClienteNoEncontradoIds
+    // );
+    // console.log("Comisión total (2.5%):", comisionTotal);
+    // console.log("========================");
 
     return {
       totalVentasConCliente,

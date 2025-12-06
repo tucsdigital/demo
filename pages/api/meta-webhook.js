@@ -1,6 +1,6 @@
 import { saveLeadToFirebase } from "@/lib/firebase";
 
-const VERIFY_TOKEN = "tucscrm2024";
+const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || "tucscrm2024";
 const FB_PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 
 async function fetchLeadFromFacebook(leadgen_id) {
@@ -13,7 +13,7 @@ async function fetchLeadFromFacebook(leadgen_id) {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error al consultar la API de Facebook:", error);
+    // console.error("Error al consultar la API de Facebook:", error);
     throw error;
   }
 }
@@ -40,17 +40,17 @@ export default async function handler(req, res) {
     const challenge = req.query["hub.challenge"];
 
     if (mode === "subscribe" && token === VERIFY_TOKEN) {
-      console.log("Verificación exitosa de Meta Webhook");
+      // console.log("Verificación exitosa de Meta Webhook");
       return res.status(200).send(challenge);
     } else {
-      console.error("Token inválido en verificación");
+      // console.error("Token inválido en verificación");
       return res.status(403).send("Token inválido");
     }
   }
 
   if (req.method === "POST") {
     const body = req.body;
-    console.log("POST recibido en webhook:", JSON.stringify(body, null, 2));
+    // console.log("POST recibido en webhook:", JSON.stringify(body, null, 2));
 
     if (body.object === "page") {
       for (const entry of body.entry) {
@@ -59,13 +59,13 @@ export default async function handler(req, res) {
             const { leadgen_id, page_id, created_time } = change.value;
             try {
               // 1. Consultar la API de Facebook
-              console.log(`Consultando Facebook API para leadgen_id: ${leadgen_id}`);
+              // console.log(`Consultando Facebook API para leadgen_id: ${leadgen_id}`);
               const fbLead = await fetchLeadFromFacebook(leadgen_id);
-              console.log("Respuesta de Facebook API:", JSON.stringify(fbLead, null, 2));
+              // console.log("Respuesta de Facebook API:", JSON.stringify(fbLead, null, 2));
 
               // 2. Parsear los datos del formulario
               const formData = parseLeadData(fbLead);
-              console.log("Datos parseados del formulario:", formData);
+              // console.log("Datos parseados del formulario:", formData);
 
               // 3. Guardar en Firestore
               const leadToSave = {
@@ -77,9 +77,9 @@ export default async function handler(req, res) {
                 status: "pending"
               };
               await saveLeadToFirebase(leadToSave);
-              console.log("Lead guardado correctamente en Firestore", leadToSave);
+              // console.log("Lead guardado correctamente en Firestore", leadToSave);
             } catch (error) {
-              console.error("Error en el procesamiento del lead:", error);
+              // console.error("Error en el procesamiento del lead:", error);
               return res.status(500).json({ error: "Error al procesar y guardar lead", details: error.message });
             }
           }
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
       }
       return res.status(200).send("EVENT_RECEIVED");
     }
-    console.warn("No es un evento de leadgen");
+    // console.warn("No es un evento de leadgen");
     return res.status(404).send("No es un evento de leadgen");
   }
 

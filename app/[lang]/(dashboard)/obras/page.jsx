@@ -780,11 +780,11 @@ const ObrasPage = () => {
       setDeleting(true);
       setDeleteMessage("");
 
-      console.log("Iniciando proceso de eliminación:", {
-        itemToDelete,
-        deleteType,
-        user,
-      });
+      // console.log("Iniciando proceso de eliminación:", {
+      //   itemToDelete,
+      //   deleteType,
+      //   user,
+      // });
 
       // Usar la API como en ventas
       const response = await fetch("/api/delete-document", {

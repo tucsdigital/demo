@@ -53,7 +53,7 @@ export async function POST(request) {
     });
 
   } catch (error) {
-    console.error('Error al subir archivo:', error);
+    // console.error('Error al subir archivo:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

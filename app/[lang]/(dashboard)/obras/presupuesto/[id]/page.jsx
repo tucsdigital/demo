@@ -147,8 +147,8 @@ const PresupuestoPage = () => {
   // Log para debuggear productos del catálogo
   useEffect(() => {
     if (productosCatalogo && productosCatalogo.length > 0) {
-      console.log("Productos del catálogo cargados:", productosCatalogo.length);
-      console.log("Primer producto de ejemplo:", productosCatalogo[0]);
+      // console.log("Productos del catálogo cargados:", productosCatalogo.length);
+      // console.log("Primer producto de ejemplo:", productosCatalogo[0]);
     }
   }, [productosCatalogo]);
 
@@ -159,28 +159,28 @@ const PresupuestoPage = () => {
   };
 
   const handleToggleEdit = async () => {
-    console.log("🔘 handleToggleEdit llamado, editando:", editando);
-    console.log("🔘 obra?.bloques:", obra?.bloques);
-    console.log("🔘 shouldSave actual:", shouldSave);
+    // console.log("🔘 handleToggleEdit llamado, editando:", editando);
+    // console.log("🔘 obra?.bloques:", obra?.bloques);
+    // console.log("🔘 shouldSave actual:", shouldSave);
     
     if (editando) {
       // FORZAR ACTUALIZACIÓN - SIEMPRE USAR PRESUPUESTODETALLE
-      console.log("🔥🔥🔥 NUEVA VERSIÓN - ACTIVANDO GUARDADO 🔥🔥🔥");
+      // console.log("🔥🔥🔥 NUEVA VERSIÓN - ACTIVANDO GUARDADO 🔥🔥🔥");
       setShouldSave(true);
-      console.log("🔥🔥🔥 shouldSave = true 🔥🔥🔥");
+      // console.log("🔥🔥🔥 shouldSave = true 🔥🔥🔥");
       setEditando(false);
     } else {
-      console.log("🔄 Activando modo edición...");
+      // console.log("🔄 Activando modo edición...");
       setEditando(true);
     }
   };
 
   // Función para actualizar el estado local de la obra
   const handleObraUpdate = (obraActualizada) => {
-    console.log("🔄 Actualizando estado local de la obra:", obraActualizada);
+    // console.log("🔄 Actualizando estado local de la obra:", obraActualizada);
     // Actualizar el estado local sin refrescar la página
     setObra(obraActualizada);
-    console.log("✅ Estado local actualizado exitosamente");
+    // console.log("✅ Estado local actualizado exitosamente");
   };
 
   // Función para resetear el flag shouldSave
@@ -272,10 +272,10 @@ const PresupuestoPage = () => {
 
   // Funciones para manejar productos seleccionados usando los componentes reutilizables
   const handleAgregarProductoCatalogo = (producto) => {
-    console.log(
-      "Producto recibido en handleAgregarProductoCatalogo:",
-      producto
-    );
+    // console.log(
+    //   "Producto recibido en handleAgregarProductoCatalogo:",
+    //   producto
+    // );
 
     // Verificar si ya está agregado
     const yaAgregado = datosConversion.materialesAdicionales.some(
@@ -337,7 +337,7 @@ const PresupuestoPage = () => {
       };
     }
 
-    console.log("Producto final a agregar:", productoParaAgregar);
+    // console.log("Producto final a agregar:", productoParaAgregar);
 
     setDatosConversion((prev) => ({
       ...prev,

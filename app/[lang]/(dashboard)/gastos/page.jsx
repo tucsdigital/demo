@@ -174,7 +174,7 @@ const GastosPage = () => {
         setGastosInternos(internos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
         setCuentasPorPagar(proveedoresGastos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
       } catch (error) {
-        console.error("Error al cargar datos:", error);
+        // console.error("Error al cargar datos:", error);
       } finally {
         setLoading(false);
       }
@@ -216,7 +216,7 @@ const GastosPage = () => {
       setOpenInterno(false);
       setEditando(null);
     } catch (error) {
-      console.error("Error al guardar gasto:", error);
+      // console.error("Error al guardar gasto:", error);
       alert("Error al guardar el gasto: " + error.message);
     } finally {
       setGuardando(false);
@@ -274,7 +274,7 @@ const GastosPage = () => {
       setBusquedaProveedor("");
       setProveedorSeleccionado(null);
     } catch (error) {
-      console.error("Error al guardar cuenta:", error);
+      // console.error("Error al guardar cuenta:", error);
       alert("Error al guardar la cuenta: " + error.message);
     } finally {
       setGuardando(false);
@@ -334,7 +334,7 @@ const GastosPage = () => {
       setMetodoPago("Efectivo");
       setNotasPago("");
     } catch (error) {
-      console.error("Error al registrar pago:", error);
+      // console.error("Error al registrar pago:", error);
       alert("Error al registrar el pago: " + error.message);
     } finally {
       setGuardando(false);
@@ -384,7 +384,7 @@ const GastosPage = () => {
         setCuentasPorPagar(prev => prev.filter(c => c.id !== id));
       }
     } catch (error) {
-      console.error("Error al eliminar:", error);
+      // console.error("Error al eliminar:", error);
       alert("Error al eliminar: " + error.message);
     }
   };
